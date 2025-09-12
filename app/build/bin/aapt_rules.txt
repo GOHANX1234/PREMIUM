@@ -1,0 +1,6 @@
+# view AndroidManifest.xml #generated:38
+-keep class uk.lgl.modmenu.FloatingModMenuService { <init>(...); }
+
+# view AndroidManifest.xml #generated:23
+-keep class uk.lgl.modmenu.MainActivity { <init>(...); }
+
