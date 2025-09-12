@@ -101,13 +101,18 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_LEFT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;
 public class FloatingModMenuService extends Service {
-        final int TEXT_COLOR = Color.parseColor("#82CAFD");
-    final int TEXT_COLOR_2 = Color.parseColor("#FFFFFF");
-    final int BTN_COLOR = Color.parseColor("#1C262D");
-    final int MENU_BG_COLOR = Color.parseColor("#DD1C2A35"); //#AARRGGBB
-    final int MENU_FEATURE_BG_COLOR = Color.parseColor("#FF171E24"); //#AARRGGBB
-    final int MENU_WIDTH = 250;
-    final int MENU_HEIGHT = 300;
+        // ImGui Style Colors
+    final int TEXT_COLOR = Color.parseColor("#FFFFFF");
+    final int TEXT_COLOR_2 = Color.parseColor("#B3B3B3");
+    final int IMGUI_ACCENT = Color.parseColor("#1E90FF");
+    final int IMGUI_BG_DARK = Color.parseColor("#1E1E1E");
+    final int IMGUI_BG_DARKER = Color.parseColor("#161616");
+    final int IMGUI_BORDER = Color.parseColor("#3A3A3A");
+    final int BTN_COLOR = Color.parseColor("#2D2D2D");
+    final int MENU_BG_COLOR = Color.parseColor("#E8161616"); //#AARRGGBB
+    final int MENU_FEATURE_BG_COLOR = Color.parseColor("#FF1E1E1E"); //#AARRGGBB
+    final int MENU_WIDTH = 320;
+    final int MENU_HEIGHT = 400;
     final float MENU_CORNER = 20f;
     final int ICON_SIZE = 50;
     final float ICON_ALPHA = 0.5f; //Transparent
@@ -123,8 +128,16 @@ public class FloatingModMenuService extends Service {
     public WindowManager.LayoutParams params;
     private LinearLayout patches;
         private LinearLayout patches2;
+    // Tab system variables
+    private LinearLayout tabContainer;
+    private LinearLayout tabContent;
+    private Button aimTab, espTab, brutalTab, otherTab;
+    private LinearLayout aimContent, espContent, brutalContent, otherContent;
+    private int currentTab = 0; // 0=AIM, 1=ESP, 2=BRUTAL, 3=OTHER
     private FrameLayout rootFrame;
     private ImageView startimage;
+    private Button toggleBtn;
+    private LinearLayout imguiBar;
         private Drawable imagem;
         private Drawable logo;
     private LinearLayout view1;
@@ -227,22 +240,58 @@ public class FloatingModMenuService extends Service {
         rootFrame.setLayoutParams(new FrameLayout.LayoutParams(-1, -1));
                 mRootContainer.setLayoutParams(new FrameLayout.LayoutParams(-2, -2));
                 mCollapsed.setLayoutParams(new RelativeLayout.LayoutParams(-2, -2));
-                mCollapsed.setVisibility(View.GONE);
+                mCollapsed.setVisibility(View.VISIBLE);
 
-                LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(dp(55), dp(55));
-        layoutParams3.topMargin = dp(15);
-
-        startimage = new ImageView(getBaseContext());
-        startimage.setLayoutParams(layoutParams3);
-        InputStream inputStream_close3 = null;
-        try {
-            inputStream_close3 = assetManager.open("mrkiller2.5.png");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Drawable ic_close3 = Drawable.createFromStream(inputStream_close3, null);
-        startimage.setImageAlpha(225);
-        startimage.setImageDrawable(ic_close3);
+        // Create ImGui-style thin bar instead of image
+        LinearLayout imguiBar = new LinearLayout(getBaseContext());
+        LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(dp(180), dp(28));
+        barParams.topMargin = dp(15);
+        imguiBar.setLayoutParams(barParams);
+        imguiBar.setOrientation(LinearLayout.HORIZONTAL);
+        imguiBar.setPadding(dp(8), dp(4), dp(8), dp(4));
+        
+        // ImGui bar background
+        GradientDrawable barBg = new GradientDrawable();
+        barBg.setColor(IMGUI_BG_DARK);
+        barBg.setStroke(dp(1), IMGUI_BORDER);
+        barBg.setCornerRadius(dp(4));
+        imguiBar.setBackground(barBg);
+        
+        // DEXX-TER text
+        TextView imguiTitle = new TextView(getBaseContext());
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, -2, 1f);
+        imguiTitle.setLayoutParams(titleParams);
+        imguiTitle.setText("DEXX-TER");
+        imguiTitle.setTextColor(TEXT_COLOR);
+        imguiTitle.setTextSize(12f);
+        imguiTitle.setTypeface(null, Typeface.BOLD);
+        imguiTitle.setGravity(Gravity.CENTER_VERTICAL);
+        
+        // Toggle button (▶)
+        toggleBtn = new Button(getBaseContext());
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(dp(24), dp(20));
+        toggleBtn.setLayoutParams(btnParams);
+        toggleBtn.setText("▶");
+        toggleBtn.setTextColor(IMGUI_ACCENT);
+        toggleBtn.setTextSize(10f);
+        toggleBtn.setPadding(0, 0, 0, 0);
+        toggleBtn.setGravity(Gravity.CENTER);
+        
+        GradientDrawable btnBg = new GradientDrawable();
+        btnBg.setColor(BTN_COLOR);
+        btnBg.setCornerRadius(dp(2));
+        toggleBtn.setBackground(btnBg);
+        
+        imguiBar.addView(imguiTitle);
+        imguiBar.addView(toggleBtn);
+        
+        // Store reference for later access
+        this.imguiBar = imguiBar;
+        
+        // Replace startimage reference
+        startimage = new ImageView(getBaseContext());  // Keep for compatibility
+        startimage.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
+        startimage.setVisibility(View.GONE);
 
         BadLogo2 = new ImageView(this);
         RelativeLayout.LayoutParams BadLogo2_LayoutParams = new RelativeLayout.LayoutParams(-0, -2);
@@ -264,37 +313,34 @@ public class FloatingModMenuService extends Service {
 
 
                 mExpanded = new LinearLayout(this);
-        mExpanded.setVisibility(View.VISIBLE);
+        mExpanded.setVisibility(View.GONE);
         mExpanded.setBackgroundColor(Color.rgb(0, 0, 0));
         mExpanded.setOrientation(1);
         mExpanded.setAlpha(0.95f);
-        android.graphics.drawable.GradientDrawable BGHGBDC = new android.graphics.drawable.GradientDrawable();
-        BGHGBDC.setColor(Color.parseColor("#292828"));
-                BGHGBDC.setStroke(4, Color.parseColor("#EAFF00"));
-        BGHGBDC.setCornerRadius(8);
-        mExpanded.setBackground(BGHGBDC);
+        // ImGui-style expanded menu background
+        GradientDrawable imguiMenuBg = new GradientDrawable();
+        imguiMenuBg.setColor(IMGUI_BG_DARKER);
+        imguiMenuBg.setStroke(dp(1), IMGUI_BORDER);
+        imguiMenuBg.setCornerRadius(dp(6));
+        mExpanded.setBackground(imguiMenuBg);
         mExpanded.setPadding(0, 0, 0, 0);
-        mExpanded.setLayoutParams(new LinearLayout.LayoutParams(dp(225), -2)); //Dp PSTeam 200, 284
+        mExpanded.setLayoutParams(new LinearLayout.LayoutParams(MENU_WIDTH, -2));
 
 
+        // Create ImGui-style tab system
+        createTabSystem();
+        
         ScrollView scrollView = new ScrollView(this);
         scrollView.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(185)));
-        LinearLayout linearLayout2 = new LinearLayout(this);
-        linearLayout2.setLayoutParams(new LinearLayout.LayoutParams(dp(170), -2));
-        linearLayout2.setBackgroundColor(Color.TRANSPARENT);
-        linearLayout2.setOrientation(1);
+        scrollView.addView(tabContent);
 
-        view1.setLayoutParams(new LinearLayout.LayoutParams(-1, 2));
-        view1.setBackgroundColor(Color.argb(255,75,0,225));
-        view1.setPadding(0, 0, 0, 0);
+        // Remove legacy purple divider
         patches.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
         patches.setOrientation(1);
         patches2.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
         patches2.setOrientation(1);
 
-        view2.setLayoutParams(new LinearLayout.LayoutParams(-1, 2));
-        view2.setBackgroundColor(Color.argb(255,75,0,225));
-        view2.setPadding(0, 0, 0, 0);
+        // Remove legacy purple divider
 
         mButtonPanel.setLayoutParams(new LinearLayout.LayoutParams(-2, -2));
         final ProgressBar Loading = new ProgressBar(this);
@@ -314,7 +360,7 @@ public class FloatingModMenuService extends Service {
         layoutParams5.gravity = 20;
         layoutParams5.leftMargin = dp(25);
         Bar.setTextSize(19.5f);
-        Bar.setTextColor(Color.parseColor("YELLOW"));
+        Bar.setTextColor(IMGUI_ACCENT);
         title.setOrientation(0);
         title.setPadding(dp(15), dp(9), dp(9), dp(9));
         Bar.setTypeface(null, Typeface.BOLD_ITALIC);
@@ -336,27 +382,28 @@ public class FloatingModMenuService extends Service {
 
 
         close = new Button(this);
-        close.setBackgroundColor(Color.parseColor("black"));
-        close.setTextSize(14);
-        close.setPadding(3, 2, 2, 2);
-        close.append(new String("CLOSE"));
-        close.setTextColor(Color.parseColor("red"));
-        android.graphics.drawable.GradientDrawable JCFBCJE = new android.graphics.drawable.GradientDrawable();
-        JCFBCJE.setColor(Color.parseColor("blue"));
-        JCFBCJE.setCornerRadius(7);
-        close.setBackground(JCFBCJE);
+        // ImGui-style close button
+        close.setTextSize(11);
+        close.setPadding(dp(8), dp(4), dp(8), dp(4));
+        close.setText("CLOSE");
+        close.setTextColor(TEXT_COLOR);
+        GradientDrawable imguiCloseBg = new GradientDrawable();
+        imguiCloseBg.setColor(BTN_COLOR);
+        imguiCloseBg.setStroke(dp(1), IMGUI_BORDER);
+        imguiCloseBg.setCornerRadius(dp(3));
+        close.setBackground(imguiCloseBg);
 
         new LinearLayout.LayoutParams(-1, dp(25)).topMargin = dp(2);
         rootFrame.addView(mRootContainer);
         this.patches.addView(Loading);
         mRootContainer.addView(mCollapsed);
         mRootContainer.addView(mExpanded);
-        mCollapsed.addView(startimage);
+        mCollapsed.addView(imguiBar);
         mExpanded.addView(title);
         title.addView(BadLogo2);
         title.addView(Bar);
+        mExpanded.addView(tabContainer);
         mExpanded.addView(scrollView);
-        scrollView.addView(patches);
         mExpanded.addView(VersaoFF);
         relativeLayout.addView(close);
         mFloatingView = rootFrame;
@@ -377,7 +424,8 @@ public class FloatingModMenuService extends Service {
         RelativeLayout relativeLayout2 = mCollapsed;
         LinearLayout linearLayout = mExpanded;
         mFloatingView.setOnTouchListener(onTouchListener());
-        startimage.setOnTouchListener(onTouchListener());
+        imguiBar.setOnTouchListener(onTouchListener());
+        // Don't add touch listener to toggleBtn to avoid click conflicts
         initMenuButton(relativeLayout2, linearLayout);
     }
 
@@ -427,10 +475,20 @@ public class FloatingModMenuService extends Service {
 
         private boolean hide = false;
     private void initMenuButton(final View view2, final View view3) {
-        startimage.setOnClickListener(new View.OnClickListener() {
+        // ImGui-style toggle button click handler
+        toggleBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    view2.setVisibility(View.GONE);
-                    view3.setVisibility(View.VISIBLE);
+                    if (view3.getVisibility() == View.GONE) {
+                        // Currently collapsed, expand the menu
+                        view2.setVisibility(View.GONE);
+                        view3.setVisibility(View.VISIBLE);
+                        toggleBtn.setText("▼");
+                    } else {
+                        // Currently expanded, collapse the menu
+                        view2.setVisibility(View.VISIBLE);
+                        view3.setVisibility(View.GONE);
+                        toggleBtn.setText("▶");
+                    }
                 }
             });
                 close.setOnClickListener(new View.OnClickListener() {
@@ -448,44 +506,267 @@ public class FloatingModMenuService extends Service {
                         });
     }
 
+    private void createTabSystem() {
+        // Create tab container
+        tabContainer = new LinearLayout(this);
+        tabContainer.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(35)));
+        tabContainer.setOrientation(LinearLayout.HORIZONTAL);
+        tabContainer.setPadding(dp(4), dp(4), dp(4), dp(4));
+        
+        // Create tab buttons
+        aimTab = createTabButton("AIM", 0);
+        espTab = createTabButton("ESP", 1);
+        brutalTab = createTabButton("BRUTAL", 2);
+        otherTab = createTabButton("OTHER", 3);
+        
+        tabContainer.addView(aimTab);
+        tabContainer.addView(espTab);
+        tabContainer.addView(brutalTab);
+        tabContainer.addView(otherTab);
+        
+        // Create content container
+        tabContent = new LinearLayout(this);
+        tabContent.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
+        tabContent.setOrientation(LinearLayout.VERTICAL);
+        
+        // Create individual tab content containers
+        aimContent = new LinearLayout(this);
+        aimContent.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+        aimContent.setOrientation(LinearLayout.VERTICAL);
+        
+        espContent = new LinearLayout(this);
+        espContent.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+        espContent.setOrientation(LinearLayout.VERTICAL);
+        
+        brutalContent = new LinearLayout(this);
+        brutalContent.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+        brutalContent.setOrientation(LinearLayout.VERTICAL);
+        
+        otherContent = new LinearLayout(this);
+        otherContent.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+        otherContent.setOrientation(LinearLayout.VERTICAL);
+        
+        // Set AIM tab as default active
+        switchToTab(0);
+    }
+    
+    private Button createTabButton(String text, final int tabIndex) {
+        Button tabBtn = new Button(this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(27), 1f);
+        params.setMargins(dp(1), 0, dp(1), 0);
+        tabBtn.setLayoutParams(params);
+        tabBtn.setText(text);
+        tabBtn.setTextSize(9f);
+        tabBtn.setTextColor(TEXT_COLOR_2);
+        tabBtn.setPadding(0, 0, 0, 0);
+        
+        // ImGui tab styling
+        GradientDrawable tabBg = new GradientDrawable();
+        tabBg.setColor(BTN_COLOR);
+        tabBg.setStroke(dp(1), IMGUI_BORDER);
+        tabBg.setCornerRadius(dp(2));
+        tabBtn.setBackground(tabBg);
+        
+        tabBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                switchToTab(tabIndex);
+            }
+        });
+        
+        return tabBtn;
+    }
+    
+    private void switchToTab(int tabIndex) {
+        currentTab = tabIndex;
+        
+        // Update tab button styles
+        resetTabButtons();
+        Button activeTab = null;
+        switch(tabIndex) {
+            case 0: activeTab = aimTab; break;
+            case 1: activeTab = espTab; break;
+            case 2: activeTab = brutalTab; break;
+            case 3: activeTab = otherTab; break;
+        }
+        
+        if (activeTab != null) {
+            GradientDrawable activeBg = new GradientDrawable();
+            activeBg.setColor(IMGUI_ACCENT);
+            activeBg.setStroke(dp(1), IMGUI_BORDER);
+            activeBg.setCornerRadius(dp(2));
+            activeTab.setBackground(activeBg);
+            activeTab.setTextColor(TEXT_COLOR);
+        }
+        
+        // Switch content
+        tabContent.removeAllViews();
+        switch(tabIndex) {
+            case 0: tabContent.addView(aimContent); break;
+            case 1: tabContent.addView(espContent); break;
+            case 2: tabContent.addView(brutalContent); break;
+            case 3: tabContent.addView(otherContent); break;
+        }
+    }
+    
+    private void resetTabButtons() {
+        Button[] tabs = {aimTab, espTab, brutalTab, otherTab};
+        for (Button tab : tabs) {
+            GradientDrawable tabBg = new GradientDrawable();
+            tabBg.setColor(BTN_COLOR);
+            tabBg.setStroke(dp(1), IMGUI_BORDER);
+            tabBg.setCornerRadius(dp(2));
+            tab.setBackground(tabBg);
+            tab.setTextColor(TEXT_COLOR_2);
+        }
+    }
+
     private void CreateMenuList() {
         String[] listFT = getFeatureList();
+        
+        // Clear all tab contents first
+        aimContent.removeAllViews();
+        espContent.removeAllViews();
+        brutalContent.removeAllViews();
+        otherContent.removeAllViews();
+        
         for (int i = 0; i < listFT.length; i++) {
             final int feature = i;
             String str = listFT[i];
-                        if (str.contains("Toggle_")) {
-                                addButton(str.replace("Toggle_", ""), new InterfaceBtn() {
-                                                public void OnWrite() {
-                                                        Changes(feature, 0);
-                                                }
-                                        });
-                        } else if (str.contains("Toggle_")) {
-                                addButton1(str.replace("Toggle_", ""), new InterfaceBtn() {
-                                                public void OnWrite() {
-                                                        Changes(feature, 0);
-                                                }
-                                        });
-                        } else if (str.contains("Toggle_")) {
-                                addButtonm(str.replace("Toggle_", ""), new InterfaceBtn() {
-                                                public void OnWrite() {
-                                                        Changes(feature, 0);
-                                                }
-                                        });
-
-                        } else if (str.contains("CT_")) {
-                addCategory(str.replace("CT_", ""));
-
-                        } else if (str.contains("SB_")) {
+            
+            // Skip category headers (CT_) as we organize by tabs now
+            if (str.contains("CT_")) {
+                continue;
+            }
+            
+            // Determine which tab this function belongs to
+            LinearLayout targetContainer = getTargetContainer(str);
+            
+            if (str.contains("Toggle55_")) {
+                addButtonToTab(targetContainer, str.replace("Toggle55_", ""), new InterfaceBtn() {
+                    public void OnWrite() {
+                        Changes(feature, 0);
+                    }
+                });
+            } else if (str.contains("Toggle2_")) {
+                addButtonToTab(targetContainer, str.replace("Toggle2_", ""), new InterfaceBtn() {
+                    public void OnWrite() {
+                        Changes(feature, 0);
+                    }
+                });
+            } else if (str.contains("Toggle_")) {
+                addButtonToTab(targetContainer, str.replace("Toggle_", ""), new InterfaceBtn() {
+                    public void OnWrite() {
+                        Changes(feature, 0);
+                    }
+                });
+            } else if (str.contains("SB_")) {
                 String[] split = str.split("_");
-                addSeekbarFly(split[1], Integer.parseInt(split[2]), Integer.parseInt(split[3]), new InterfaceInt() {
-                                                public void OnWrite(int i) {
-                                                        Changes(feature, i);
-                                                }
-                                        });
-
-                        }
-                }
+                addSeekbarToTab(targetContainer, split[1], Integer.parseInt(split[2]), Integer.parseInt(split[3]), new InterfaceInt() {
+                    public void OnWrite(int i) {
+                        Changes(feature, i);
+                    }
+                });
+            }
         }
+    }
+    
+    private LinearLayout getTargetContainer(String featureName) {
+        String name = featureName.toUpperCase();
+        
+        // AIM tab functions
+        if (name.contains("AIM") || name.contains("SPEED") || name.contains("FOV") || name.contains("FIRE") || name.contains("SCOPE") || name.contains("VISBEL") || name.contains("MOVEMENT")) {
+            return aimContent;
+        }
+        
+        // ESP tab functions  
+        if (name.contains("ESP")) {
+            return espContent;
+        }
+        
+        // BRUTAL tab functions (destructive/powerful hacks)
+        if (name.contains("FLY") || name.contains("TELEKILL") || name.contains("TELEPORT") || name.contains("GHOST")) {
+            return brutalContent;
+        }
+        
+        // Everything else goes to OTHER tab
+        return otherContent;
+    }
+    
+    private void addButtonToTab(LinearLayout container, String feature, final InterfaceBtn interfaceBtn) {
+        final Button button = new Button(this);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, dp(32));
+        layoutParams.setMargins(dp(4), dp(2), dp(4), dp(2));
+        button.setLayoutParams(layoutParams);
+        button.setPadding(dp(8), dp(4), dp(8), dp(4));
+        button.setTextSize(10.0f);
+        button.setTextColor(TEXT_COLOR);
+        button.setTypeface(Typeface.DEFAULT);
+        button.setGravity(Gravity.CENTER);
+        
+        // ImGui-style button setup
+        button.setText(feature + " OFF");
+        GradientDrawable buttonBg = new GradientDrawable();
+        buttonBg.setColor(BTN_COLOR);
+        buttonBg.setStroke(dp(1), IMGUI_BORDER);
+        buttonBg.setCornerRadius(dp(3));
+        button.setBackground(buttonBg);
+        
+        button.setOnClickListener(new View.OnClickListener() {
+            boolean isOn = false;
+            public void onClick(View view) {
+                isOn = !isOn;
+                if (isOn) {
+                    button.setText(feature + " ON");
+                    GradientDrawable activeBg = new GradientDrawable();
+                    activeBg.setColor(IMGUI_ACCENT);
+                    activeBg.setStroke(dp(1), IMGUI_BORDER);
+                    activeBg.setCornerRadius(dp(3));
+                    button.setBackground(activeBg);
+                } else {
+                    button.setText(feature + " OFF");
+                    GradientDrawable inactiveBg = new GradientDrawable();
+                    inactiveBg.setColor(BTN_COLOR);
+                    inactiveBg.setStroke(dp(1), IMGUI_BORDER);
+                    inactiveBg.setCornerRadius(dp(3));
+                    button.setBackground(inactiveBg);
+                }
+                interfaceBtn.OnWrite();
+            }
+        });
+        
+        container.addView(button);
+    }
+    
+    private void addSeekbarToTab(LinearLayout container, String text, int min, int max, final InterfaceInt interfaceInt) {
+        LinearLayout seekLayout = new LinearLayout(this);
+        seekLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(40)));
+        seekLayout.setOrientation(LinearLayout.VERTICAL);
+        seekLayout.setPadding(dp(8), dp(4), dp(8), dp(4));
+        
+        TextView label = new TextView(this);
+        label.setText(text + ": " + min);
+        label.setTextColor(TEXT_COLOR);
+        label.setTextSize(9f);
+        
+        SeekBar seekBar = new SeekBar(this);
+        seekBar.setMax(max - min);
+        seekBar.setProgress(0);
+        
+        // ImGui-style seekbar
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int value = min + progress;
+                label.setText(text + ": " + value);
+                interfaceInt.OnWrite(value);
+            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+        
+        seekLayout.addView(label);
+        seekLayout.addView(seekBar);
+        container.addView(seekLayout);
+    }
 
     private TextView textView2;
     private String featureNameExt;
