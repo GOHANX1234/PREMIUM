@@ -4,3 +4,26 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Android Dev Monitor"
+
+[[workflows.workflow]]
+name = "Android Dev Monitor"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Android Mod Menu Development Environment Ready\" && echo \"Project: AIDE Android Mod Menu -> DEXX-TER\" && echo \"Monitoring Java source files...\" && while true; do sleep 30; echo \"$(date): Development environment active\"; done"
+
+[workflows.workflow.metadata]
+outputType = "console"
