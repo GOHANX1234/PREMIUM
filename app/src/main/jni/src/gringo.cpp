@@ -37,13 +37,13 @@ return true;
 
 JNIEXPORT jstring JNICALL
 Java_uk_lgl_modmenu_FloatingModMenuService_ForegroundGravity(JNIEnv *env,jobject activityObject) {
-jstring str = env->NewStringUTF((OBFUSCATE("GOD X MODS TEAM")));
+jstring str = env->NewStringUTF((OBFUSCATE("DEXX-TER")));
 return str;
 }
 
 JNIEXPORT jstring JNICALL
 Java_uk_lgl_modmenu_FloatingModMenuService_Gravity(JNIEnv *env,jobject activityObject) {
-jstring str = env->NewStringUTF((OBFUSCATE("100% ANTI BAN")));
+jstring str = env->NewStringUTF((OBFUSCATE("Premium ImGui Style")));
 return str;
 }
 
@@ -356,15 +356,15 @@ return false;
 }
 
 /*namespace Save{
-	void* DamageInfo;
-	void* DamagerWeaponDynamicInfo;
-	clock_t AimDelay;
-	int AimFPS = (1000000 / 15);
+        void* DamageInfo;
+        void* DamagerWeaponDynamicInfo;
+        clock_t AimDelay;
+        int AimFPS = (1000000 / 15);
 }
 
 void (*DamageInfo)(void*);
 void DamageInfoHook(void* Player){
-	return DamageInfo(Save::DamageInfo=Player);
+        return DamageInfo(Save::DamageInfo=Player);
 }
 
 
@@ -375,7 +375,7 @@ static void AimSkill(void* Enemy) {
         Save::AimDelay = clock() + Save::AimFPS;
         void* LocalPlayer = Current_Local_Player();
         if (LocalPlayer && !get_isWatching(LocalPlayer)){
-		void* WeaponOnHand = PlayerWeaponOnHand(LocalPlayer);
+                void* WeaponOnHand = PlayerWeaponOnHand(LocalPlayer);
         
         *(int32_t*)((uintptr_t) Save::DamageInfo + 0xC) = 1;
         *(void**)((uintptr_t) Save::DamageInfo + 0x18) = *(void**)((uintptr_t) LocalPlayer + 0x148);
@@ -383,16 +383,16 @@ static void AimSkill(void* Enemy) {
         *(void**)((uintptr_t) Save::DamageInfo + 0x30) = WeaponOnHand;
         *(Vector3*)((uintptr_t) Save::DamageInfo + 0x38) = CameraMain(LocalPlayer);
         *(Vector3*)((uintptr_t) Save::DamageInfo + 0x44) = GetHeadPosition(Enemy);
-		
+                
           Vector3 m_Head = GetHeadPosition(Enemy);
           Vector3 m_HeadLocal = GetHeadPosition(Current_Local_Player());
           void *WeaponHand = PlayerWeaponOnHand(Current_Local_Player());
             if (WeaponHand != nullptr) {
-				StartWholeBodyFiring(Current_Local_Player(),WeaponHand);
+                                StartWholeBodyFiring(Current_Local_Player(),WeaponHand);
                 LateKillUpdate(Enemy, *(int *) ((long) WeaponHand + 0x58),
                            get_PlayerID(Current_Local_Player()), Save::DamageInfo, GetWeapon(WeaponHand),
                            m_HeadLocal, m_Head, *(monoList<float> *) ((long) Enemy + 0x8C0), 0, 0);
-				StopFire(Current_Local_Player(),WeaponHand);
+                                StopFire(Current_Local_Player(),WeaponHand);
             }
         }
     }
@@ -516,8 +516,8 @@ closestEnemy = Player;
 }
 }
 /*if (AimKill) {
-        	AimSkill(closestEnemy);
-		   }*/
+                AimSkill(closestEnemy);
+                   }*/
 
 }
 }
@@ -1524,20 +1524,20 @@ AimMovement = MemoryPatch("libil2cpp.so",0x14eb2d4, "\x01\x00\xA0\xE3\x1E\xFF\x2
 *
 MemoryPatch("libil2cpp.so", 0x15d4c08, "00 00 A0 E3 1E FF 2F E1", 4).Modify(); //[1.94] public bool IsBypassed(Uri host) { }
 
-	MemoryPatch("libil2cpp.so", 0x1f7a104, "40 0F 43 E3 1E FF 2F E1", 4).Modify(); //[1.94] public bool IsBypassed(Uri host) { }
-	MemoryPatch("libil2cpp.so", 0x17cd2a8, "00 00 00 00", 4).Modify(); //[1.94] public bool IsBypassed(Uri host) { }
-	
-	
-	
+        MemoryPatch("libil2cpp.so", 0x1f7a104, "40 0F 43 E3 1E FF 2F E1", 4).Modify(); //[1.94] public bool IsBypassed(Uri host) { }
+        MemoryPatch("libil2cpp.so", 0x17cd2a8, "00 00 00 00", 4).Modify(); //[1.94] public bool IsBypassed(Uri host) { }
+        
+        
+        
    MemoryPatch::createWithHex("libil2cpp.so", 0x56c3b6c + 116, "00 F0 20 E3", 4).Modify();
     MemoryPatch::createWithHex("libil2cpp.so", 0x5111c10 + 136, "00 F0 20 E3", 4).Modify();
-		
+                
     MemoryPatch::createWithHex("libil2cpp.so", 0X3450EB8 + 116, "00 F0 20 E3", 4).Modify();
     MemoryPatch::createWithHex("libil2cpp.so", 0x4886848 + 136, "00 F0 20 E3", 4).Modify();
     
     
     
-	
+        
 MSHookFunction((void *)getRealOffset(0x179dab8), (void *)_Test, (void **)&orig_Test); // private Void DetectAndroidApplications() { }
 MSHookFunction((void *)getRealOffset(0x6025d98), (void *)_MatchMaking, (void **)&MatchMaking); //public static bool IsInstanceOf(IntPtr obj, IntPtr clazz) { }
 MSHookFunction((void *)getRealOffset(0x179acb8), (void *)_Test, (void **)&orig_Test); // private Void ProcessANOGGP(LoginRes loginRes, (void **)&MajorLoginRes majorRes) { }
@@ -1599,110 +1599,110 @@ MSHookFunction((void *)getRealOffset(0x431cbb4), (void *)_GetBlackList, (void **
 MSHookFunction((void *)getRealOffset(0x2eb74b4), (void *)_GetBlackList, (void **)&GetBlackList);//public Void Update(Single gameTime) { }
 
 /*
-	// RVA: 0x52cd5c0 VA: 0xb7c545c0
-	public Void .ctor() { }
+        // RVA: 0x52cd5c0 VA: 0xb7c545c0
+        public Void .ctor() { }
     
-    	// RVA: 0x51d8608 VA: 0xb7b5f608
-	public static String EAFJGAEHOGK(Boolean KOPAFJHCIIM) { }
+        // RVA: 0x51d8608 VA: 0xb7b5f608
+        public static String EAFJGAEHOGK(Boolean KOPAFJHCIIM) { }
     
-    	// RVA: 0x51d8070 VA: 0xb7b5f070
-	public static String DGFDEECPIDP() { }
+        // RVA: 0x51d8070 VA: 0xb7b5f070
+        public static String DGFDEECPIDP() { }
     
-    	// RVA: 0x431ef30 VA: 0xb6ca5f30
-	private static Void .cctor() { }
+        // RVA: 0x431ef30 VA: 0xb6ca5f30
+        private static Void .cctor() { }
     
-    	// RVA: 0x431ed98 VA: 0xb6ca5d98
-	public static Int32 SetVoiceReciver(String roomId, String userList) { }
+        // RVA: 0x431ed98 VA: 0xb6ca5d98
+        public static Int32 SetVoiceReciver(String roomId, String userList) { }
     
-    	// RVA: 0x431ec04 VA: 0xb6ca5c04
-	public static Void SetUserVolume(String userId, UInt32 volume) { }
+        // RVA: 0x431ec04 VA: 0xb6ca5c04
+        public static Void SetUserVolume(String userId, UInt32 volume) { }
     
-    	// RVA: 0x431ea6c VA: 0xb6ca5a6c
-	public static Int32 ReportUserAudio(String reportUserID, String customData) { }
+        // RVA: 0x431ea6c VA: 0xb6ca5a6c
+        public static Int32 ReportUserAudio(String reportUserID, String customData) { }
     
-    	// RVA: 0x431e8d4 VA: 0xb6ca58d4
-	public static Int32 SetReportInfo(Int32 nTimeSec, String language) { }
+        // RVA: 0x431e8d4 VA: 0xb6ca58d4
+        public static Int32 SetReportInfo(Int32 nTimeSec, String language) { }
     
-    	// RVA: 0x431e5c0 VA: 0xb6ca55c0
-	public static Int32 MuteTargetPlayer(String player_id, Boolean is_mute) { }
+        // RVA: 0x431e5c0 VA: 0xb6ca55c0
+        public static Int32 MuteTargetPlayer(String player_id, Boolean is_mute) { }
     
-    	// RVA: 0x431e440 VA: 0xb6ca5440
-	public static Void EnableVoiceCaptureCallBack(Boolean enable) { }
+        // RVA: 0x431e440 VA: 0xb6ca5440
+        public static Void EnableVoiceCaptureCallBack(Boolean enable) { }
     
-    	// RVA: 0x431e2c8 VA: 0xb6ca52c8
-	public static Void OnUpdate() { }
+        // RVA: 0x431e2c8 VA: 0xb6ca52c8
+        public static Void OnUpdate() { }
     
-    	// RVA: 0x431de58 VA: 0xb6ca4e58
-	public static Void SetMicAndSpeakerMute(Boolean micro_mute, Boolean speaker_mute) { }
+        // RVA: 0x431de58 VA: 0xb6ca4e58
+        public static Void SetMicAndSpeakerMute(Boolean micro_mute, Boolean speaker_mute) { }
     
-    	// RVA: 0x431dcd0 VA: 0xb6ca4cd0
-	public static Boolean IsSameWithCurSpeakerMute(Boolean value) { }
+        // RVA: 0x431dcd0 VA: 0xb6ca4cd0
+        public static Boolean IsSameWithCurSpeakerMute(Boolean value) { }
     
-    	// RVA: 0x431db48 VA: 0xb6ca4b48
-	public static Boolean IsSameWithCurMicMute(Boolean value) { }
+        // RVA: 0x431db48 VA: 0xb6ca4b48
+        public static Boolean IsSameWithCurMicMute(Boolean value) { }
     
-    	// RVA: 0x431d9c8 VA: 0xb6ca49c8
-	public static Void SetVolume(UInt32 volume) { }
+        // RVA: 0x431d9c8 VA: 0xb6ca49c8
+        public static Void SetVolume(UInt32 volume) { }
     
-    	// RVA: 0x431d804 VA: 0xb6ca4804
-	public static String ParseErrorCodeName(Int32 error_code) { }
+        // RVA: 0x431d804 VA: 0xb6ca4804
+        public static String ParseErrorCodeName(Int32 error_code) { }
     
-    	// RVA: 0x431d640 VA: 0xb6ca4640
-	public static String ParseEventName(Int32 event_id) { }
+        // RVA: 0x431d640 VA: 0xb6ca4640
+        public static String ParseEventName(Int32 event_id) { }
     
-    	// RVA: 0x431d4a8 VA: 0xb6ca44a8
-	public static EGameVoiceEvent ParseEventType(Int32 event_id, String param) { }
+        // RVA: 0x431d4a8 VA: 0xb6ca44a8
+        public static EGameVoiceEvent ParseEventType(Int32 event_id, String param) { }
     
-    	// RVA: 0x431d324 VA: 0xb6ca4324
-	public static Boolean HasError(Int32 error_code) { }
+        // RVA: 0x431d324 VA: 0xb6ca4324
+        public static Boolean HasError(Int32 error_code) { }
     
-    	// RVA: 0x431d1a8 VA: 0xb6ca41a8
-	public static Int32 UnInit() { }
+        // RVA: 0x431d1a8 VA: 0xb6ca41a8
+        public static Int32 UnInit() { }
     
-    	// RVA: 0x431d030 VA: 0xb6ca4030
-	public static Void SetMicCallback() { }
+        // RVA: 0x431d030 VA: 0xb6ca4030
+        public static Void SetMicCallback() { }
     
-    	// RVA: 0x431ceb0 VA: 0xb6ca3eb0
-	public static Void PauseChannel(Boolean is_pause) { }
+        // RVA: 0x431ceb0 VA: 0xb6ca3eb0
+        public static Void PauseChannel(Boolean is_pause) { }
     
-    	// RVA: 0x431cd34 VA: 0xb6ca3d34
-	public static Int32 LeaveRoom() { }
+        // RVA: 0x431cd34 VA: 0xb6ca3d34
+        public static Int32 LeaveRoom() { }
     
-    	// RVA: 0x431cbb4 VA: 0xb6ca3bb4
-	public static Void OnJoined(String room_id) { }
+        // RVA: 0x431cbb4 VA: 0xb6ca3bb4
+        public static Void OnJoined(String room_id) { }
     
-    	// RVA: 0x431ca30 VA: 0xb6ca3a30
-	public static Int32 JoinRoom(RoomInfo info) { }
+        // RVA: 0x431ca30 VA: 0xb6ca3a30
+        public static Int32 JoinRoom(RoomInfo info) { }
     
-    	// RVA: 0x431c8b8 VA: 0xb6ca38b8
-	public static Void OnInited() { }
+        // RVA: 0x431c8b8 VA: 0xb6ca38b8
+        public static Void OnInited() { }
     
-    	// RVA: 0x431c734 VA: 0xb6ca3734
-	public static Int32 Init(String callBack_objectName) { }
+        // RVA: 0x431c734 VA: 0xb6ca3734
+        public static Int32 Init(String callBack_objectName) { }
     
-    	// RVA: 0x431c5b4 VA: 0xb6ca35b4
-	public static Void SetExtraConfig(Object extra_config) { }
+        // RVA: 0x431c5b4 VA: 0xb6ca35b4
+        public static Void SetExtraConfig(Object extra_config) { }
     
-    	// RVA: 0x431c420 VA: 0xb6ca3420
-	public static Void SetAppkeySecret(String appKey, String appSecret) { }
+        // RVA: 0x431c420 VA: 0xb6ca3420
+        public static Void SetAppkeySecret(String appKey, String appSecret) { }
     
-    	// RVA: 0x431c28c VA: 0xb6ca328c
-	public static Void SetRegion(Int32 region_id, String region_name) { }
+        // RVA: 0x431c28c VA: 0xb6ca328c
+        public static Void SetRegion(Int32 region_id, String region_name) { }
     
-    	// RVA: 0x431c10c VA: 0xb6ca310c
-	public static Void SetGroupEnvironment(String environment) { }
+        // RVA: 0x431c10c VA: 0xb6ca310c
+        public static Void SetGroupEnvironment(String environment) { }
     
-    	// RVA: 0x431c04c VA: 0xb6ca304c
-	public static Void SetImpl(IGameVoiceInterface impl) { }
+        // RVA: 0x431c04c VA: 0xb6ca304c
+        public static Void SetImpl(IGameVoiceInterface impl) { }
     
-    	// RVA: 0x431be7c VA: 0xb6ca2e7c
-	public static GameVoiceImpl_FreeFireVoice get_FreeFireVoiceImpl() { }
+        // RVA: 0x431be7c VA: 0xb6ca2e7c
+        public static GameVoiceImpl_FreeFireVoice get_FreeFireVoiceImpl() { }
     
-    	// RVA: 0x4319da4 VA: 0xb6ca0da4
-	public static Int32 setUTData(String utData) { }
+        // RVA: 0x4319da4 VA: 0xb6ca0da4
+        public static Int32 setUTData(String utData) { }
     
-    	// RVA: 0x2eb74b4 VA: 0xb583e4b4
-	public Void Update(Single gameTime) { }
+        // RVA: 0x2eb74b4 VA: 0xb583e4b4
+        public Void Update(Single gameTime) { }
     
     
     

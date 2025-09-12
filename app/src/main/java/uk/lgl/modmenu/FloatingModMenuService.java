@@ -101,7 +101,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_LEFT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;
 public class FloatingModMenuService extends Service {
-	final int TEXT_COLOR = Color.parseColor("#82CAFD");
+        final int TEXT_COLOR = Color.parseColor("#82CAFD");
     final int TEXT_COLOR_2 = Color.parseColor("#FFFFFF");
     final int BTN_COLOR = Color.parseColor("#1C262D");
     final int MENU_BG_COLOR = Color.parseColor("#DD1C2A35"); //#AARRGGBB
@@ -122,19 +122,19 @@ public class FloatingModMenuService extends Service {
     public WindowManager mWindowManager;
     public WindowManager.LayoutParams params;
     private LinearLayout patches;
-	private LinearLayout patches2;
+        private LinearLayout patches2;
     private FrameLayout rootFrame;
     private ImageView startimage;
-	private Drawable imagem;
-	private Drawable logo;
+        private Drawable imagem;
+        private Drawable logo;
     private LinearLayout view1;
     private LinearLayout view2;
-	private GradientDrawable thumb;
+        private GradientDrawable thumb;
 
-	//Canvas 
-	private ESPView overlayView;
-	public static native void DrawOn(ESPView espView, Canvas canvas);
-	private WindowManager.LayoutParams espParams;
+        //Canvas 
+        private ESPView overlayView;
+        public static native void DrawOn(ESPView espView, Canvas canvas);
+        private WindowManager.LayoutParams espParams;
     private native String ForegroundGravity();
     private native String Gravity();
     private AlertDialog alert;
@@ -148,8 +148,8 @@ public class FloatingModMenuService extends Service {
     public static native String Toast();
 
     private  GradientDrawable gd = new GradientDrawable();
-	private  ValueAnimator animator;
-	private  ValueAnimator animator_c;
+        private  ValueAnimator animator;
+        private  ValueAnimator animator_c;
 
     public native void Changes(int feature, int value);
 
@@ -180,7 +180,7 @@ public class FloatingModMenuService extends Service {
         return 2003;
     }
 
-	private void DrawCanvas() {
+        private void DrawCanvas() {
         WindowManager.LayoutParams layoutParams;
         this.espParams = layoutParams = new WindowManager.LayoutParams(-1, -1, this.getLayoutType(), 56, -3);
         layoutParams.gravity = 8388659;
@@ -194,17 +194,17 @@ public class FloatingModMenuService extends Service {
     public void onCreate() {
         super.onCreate();
         System.loadLibrary("MRKILLER2.5");
-		this.overlayView = new ESPView((Context)this);
+                this.overlayView = new ESPView((Context)this);
         initFloating();
         //CreateMenuList();
-		DrawCanvas();
-		//l  initAlertDiag();
+                DrawCanvas();
+                //l  initAlertDiag();
 
-		/*
-		 final Handler handler = new Handler();
-		 handler.post(new Runnable() {
-		 public void run() {
-		 handler.postDelayed(this, 1000);*/
+                /*
+                 final Handler handler = new Handler();
+                 handler.post(new Runnable() {
+                 public void run() {
+                 handler.postDelayed(this, 1000);*/
     }
 
     private void initFloating() {
@@ -212,24 +212,24 @@ public class FloatingModMenuService extends Service {
         mRootContainer = new RelativeLayout(getBaseContext()); // Markup on which two markups of the icon and the menu itself will be placed
         mCollapsed = new RelativeLayout(getBaseContext()); // Markup of the icon (when the menu is minimized)
         mExpanded = new LinearLayout(getBaseContext()); // Menu markup (when the menu is expanded)
-		AssetManager assetManager = getAssets();
+                AssetManager assetManager = getAssets();
         view1 = new LinearLayout(getBaseContext());
         patches = new LinearLayout(getBaseContext());
-		patches2 = new LinearLayout(getBaseContext());
+                patches2 = new LinearLayout(getBaseContext());
         view2 = new LinearLayout(getBaseContext());
         mButtonPanel = new LinearLayout(getBaseContext()); // Layout of option buttons (when the menu is expanded)
-		/*
-		 Toast.makeText(this, (Html.fromHtml("AutoBypass Activated!!!!")), Toast.LENGTH_LONG).show();
-		 Toast.makeText(this, (Html.fromHtml("Functions Will Load Soon After Bypass..........")), Toast.LENGTH_LONG).show();
-		 */
+                /*
+                 Toast.makeText(this, (Html.fromHtml("AutoBypass Activated!!!!")), Toast.LENGTH_LONG).show();
+                 Toast.makeText(this, (Html.fromHtml("Functions Will Load Soon After Bypass..........")), Toast.LENGTH_LONG).show();
+                 */
 
         mButtonPanel = new LinearLayout(getBaseContext());
         rootFrame.setLayoutParams(new FrameLayout.LayoutParams(-1, -1));
-		mRootContainer.setLayoutParams(new FrameLayout.LayoutParams(-2, -2));
-		mCollapsed.setLayoutParams(new RelativeLayout.LayoutParams(-2, -2));
-		mCollapsed.setVisibility(View.GONE);
+                mRootContainer.setLayoutParams(new FrameLayout.LayoutParams(-2, -2));
+                mCollapsed.setLayoutParams(new RelativeLayout.LayoutParams(-2, -2));
+                mCollapsed.setVisibility(View.GONE);
 
-		LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(dp(55), dp(55));
+                LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(dp(55), dp(55));
         layoutParams3.topMargin = dp(15);
 
         startimage = new ImageView(getBaseContext());
@@ -263,14 +263,14 @@ public class FloatingModMenuService extends Service {
         ((ViewGroup.MarginLayoutParams) this.BadLogo2.getLayoutParams()).leftMargin = convertDipToPixels(0);
 
 
-		mExpanded = new LinearLayout(this);
+                mExpanded = new LinearLayout(this);
         mExpanded.setVisibility(View.VISIBLE);
         mExpanded.setBackgroundColor(Color.rgb(0, 0, 0));
         mExpanded.setOrientation(1);
         mExpanded.setAlpha(0.95f);
         android.graphics.drawable.GradientDrawable BGHGBDC = new android.graphics.drawable.GradientDrawable();
         BGHGBDC.setColor(Color.parseColor("#292828"));
-		BGHGBDC.setStroke(4, Color.parseColor("#EAFF00"));
+                BGHGBDC.setStroke(4, Color.parseColor("#EAFF00"));
         BGHGBDC.setCornerRadius(8);
         mExpanded.setBackground(BGHGBDC);
         mExpanded.setPadding(0, 0, 0, 0);
@@ -304,16 +304,11 @@ public class FloatingModMenuService extends Service {
         Bar.append(new String(ForegroundGravity()));
         VersaoFF.append(new String(Gravity()));
         Loading.setPadding(0, 10, 0, 10);
-        final Handler handlers = new Handler(Looper.getMainLooper());
-        handlers.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					Loading.setVisibility(View.GONE);
-					CreateMenuList();
-				}
-			}, 3000);
+        // Remove loading delay - create menu immediately
+        Loading.setVisibility(View.GONE);
+        CreateMenuList();
 
-		LinearLayout title = new LinearLayout(this);
+                LinearLayout title = new LinearLayout(this);
         // TextView View = new TextView(this);
         LinearLayout.LayoutParams layoutParams5 = new LinearLayout.LayoutParams(-2, -2);
         layoutParams5.gravity = 20;
@@ -328,11 +323,11 @@ public class FloatingModMenuService extends Service {
         LinearLayout.LayoutParams VersaoFF2 = new LinearLayout.LayoutParams(-2, -2);
 
         VersaoFF.setTextColor(-1);
-		VersaoFF.setTextSize(13.0f);
-		VersaoFF.setTypeface((Typeface) null, 1);
-		VersaoFF.setGravity(Gravity.CENTER);
+                VersaoFF.setTextSize(13.0f);
+                VersaoFF.setTypeface((Typeface) null, 1);
+                VersaoFF.setGravity(Gravity.CENTER);
         VersaoFF.setPadding(0,0,0,2);
-	    VersaoFF.setTextColor(Color.parseColor("blue"));
+            VersaoFF.setTextColor(Color.parseColor("blue"));
 
 
         RelativeLayout relativeLayout = new RelativeLayout(this);
@@ -430,7 +425,7 @@ public class FloatingModMenuService extends Service {
         };
     }
 
-	private boolean hide = false;
+        private boolean hide = false;
     private void initMenuButton(final View view2, final View view3) {
         startimage.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
@@ -438,19 +433,19 @@ public class FloatingModMenuService extends Service {
                     view3.setVisibility(View.VISIBLE);
                 }
             });
-		close.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View view) {
-					if (hide) {
-						view2.setVisibility(View.VISIBLE);
-						view2.setAlpha(0);
-						view3.setVisibility(View.GONE);
-					} else {
-						view2.setVisibility(View.VISIBLE);
-						view2.setAlpha(0.95f);
-						view3.setVisibility(View.GONE);
-					}
-				}
-			});
+                close.setOnClickListener(new View.OnClickListener() {
+                                public void onClick(View view) {
+                                        if (hide) {
+                                                view2.setVisibility(View.VISIBLE);
+                                                view2.setAlpha(0);
+                                                view3.setVisibility(View.GONE);
+                                        } else {
+                                                view2.setVisibility(View.VISIBLE);
+                                                view2.setAlpha(0.95f);
+                                                view3.setVisibility(View.GONE);
+                                        }
+                                }
+                        });
     }
 
     private void CreateMenuList() {
@@ -458,39 +453,39 @@ public class FloatingModMenuService extends Service {
         for (int i = 0; i < listFT.length; i++) {
             final int feature = i;
             String str = listFT[i];
-			if (str.contains("Toggle_")) {
-				addButton(str.replace("Toggle_", ""), new InterfaceBtn() {
-						public void OnWrite() {
-							Changes(feature, 0);
-						}
-					});
-			} else if (str.contains("Toggle_")) {
-				addButton1(str.replace("Toggle_", ""), new InterfaceBtn() {
-						public void OnWrite() {
-							Changes(feature, 0);
-						}
-					});
-			} else if (str.contains("Toggle_")) {
-				addButtonm(str.replace("Toggle_", ""), new InterfaceBtn() {
-						public void OnWrite() {
-							Changes(feature, 0);
-						}
-					});
+                        if (str.contains("Toggle_")) {
+                                addButton(str.replace("Toggle_", ""), new InterfaceBtn() {
+                                                public void OnWrite() {
+                                                        Changes(feature, 0);
+                                                }
+                                        });
+                        } else if (str.contains("Toggle_")) {
+                                addButton1(str.replace("Toggle_", ""), new InterfaceBtn() {
+                                                public void OnWrite() {
+                                                        Changes(feature, 0);
+                                                }
+                                        });
+                        } else if (str.contains("Toggle_")) {
+                                addButtonm(str.replace("Toggle_", ""), new InterfaceBtn() {
+                                                public void OnWrite() {
+                                                        Changes(feature, 0);
+                                                }
+                                        });
 
-			} else if (str.contains("CT_")) {
+                        } else if (str.contains("CT_")) {
                 addCategory(str.replace("CT_", ""));
 
-			} else if (str.contains("SB_")) {
+                        } else if (str.contains("SB_")) {
                 String[] split = str.split("_");
                 addSeekbarFly(split[1], Integer.parseInt(split[2]), Integer.parseInt(split[3]), new InterfaceInt() {
-						public void OnWrite(int i) {
-							Changes(feature, i);
-						}
-					});
+                                                public void OnWrite(int i) {
+                                                        Changes(feature, i);
+                                                }
+                                        });
 
-			}
-		}
-	}
+                        }
+                }
+        }
 
     private TextView textView2;
     private String featureNameExt;
@@ -509,7 +504,7 @@ public class FloatingModMenuService extends Service {
         }
     }
 
-	private void addCategory(String text) {
+        private void addCategory(String text) {
         TextView textView = new TextView(this);
         LinearLayout.LayoutParams layoutParams7 = new LinearLayout.LayoutParams(-1, -2);
         textView.setText(text);
@@ -517,9 +512,9 @@ public class FloatingModMenuService extends Service {
         textView.setLayoutParams(layoutParams7);
         textView.setPadding(5, 5, 5, 5);
         textView.setTextSize(11);
-		textView.setTextColor(Color.parseColor( "#FF0004"));
+                textView.setTextColor(Color.parseColor( "#FF0004"));
         textView.setGravity(17);
-		textView.setBackgroundColor(Color.parseColor( "#FFF800"));
+                textView.setBackgroundColor(Color.parseColor( "#FFF800"));
         patches.addView(textView);
     }
 
@@ -542,7 +537,7 @@ public class FloatingModMenuService extends Service {
             button.setBackgroundColor(Color.TRANSPARENT);
             android.graphics.drawable.GradientDrawable GAFDJHE = new android.graphics.drawable.GradientDrawable();
             GAFDJHE.setColor(Color.parseColor("Black"));
-			GAFDJHE.setStroke(6, Color.parseColor("#FFF800"));
+                        GAFDJHE.setStroke(6, Color.parseColor("#FFF800"));
             GAFDJHE.setCornerRadius(10);
             android.graphics.drawable.RippleDrawable GAFDJHE_RE = new android.graphics.drawable.RippleDrawable(new android.content.res.ColorStateList(new int[][]{new int[]{}}, new int[]{ Color.parseColor("Black")}), GAFDJHE, null);
             button.setBackground(GAFDJHE_RE);
@@ -558,9 +553,9 @@ public class FloatingModMenuService extends Service {
                             button.setText(Html.fromHtml("<font>" + feature2 + " <font color='WHITE'>" + "ON" + "</font>"));
                             android.graphics.drawable.GradientDrawable ICECHHF = new android.graphics.drawable.GradientDrawable();
                             ICECHHF.setColor(Color.argb(250, 10, 140, 180));
-							ICECHHF.setColor(Color.parseColor("blue"));
-							ICECHHF.setStroke(6, Color.parseColor("#FFF800"));
-							button.setBackgroundColor(Color.TRANSPARENT);
+                                                        ICECHHF.setColor(Color.parseColor("blue"));
+                                                        ICECHHF.setStroke(6, Color.parseColor("#FFF800"));
+                                                        button.setBackgroundColor(Color.TRANSPARENT);
                             ICECHHF.setCornerRadius(10);
                             android.graphics.drawable.RippleDrawable ICECHHF_RE = new android.graphics.drawable.RippleDrawable(new android.content.res.ColorStateList(new int[][]{new int[]{}}, new int[]{ Color.parseColor("black")}), ICECHHF, null);
                             button.setBackground(ICECHHF_RE);
@@ -574,7 +569,7 @@ public class FloatingModMenuService extends Service {
                         button.setBackgroundColor(Color.TRANSPARENT);
                         android.graphics.drawable.GradientDrawable GAFDJHE = new android.graphics.drawable.GradientDrawable();
                         GAFDJHE.setColor(Color.parseColor("Black"));
-						GAFDJHE.setStroke(6, Color.parseColor("#FFF800"));
+                                                GAFDJHE.setStroke(6, Color.parseColor("#FFF800"));
                         GAFDJHE.setCornerRadius(10);
                         android.graphics.drawable.RippleDrawable GAFDJHE_RE = new android.graphics.drawable.RippleDrawable(new android.content.res.ColorStateList(new int[][]{new int[]{}}, new int[]{ Color.parseColor("red")}), GAFDJHE, null);
                         button.setBackground(GAFDJHE_RE);
@@ -598,7 +593,7 @@ public class FloatingModMenuService extends Service {
         patches.addView(button);
     }
 
-	public void addButtonm(String feature, final InterfaceBtn interfaceBtn) {
+        public void addButtonm(String feature, final InterfaceBtn interfaceBtn) {
         final TextView button = new TextView(this);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, dp(35));
         layoutParams.setMargins(4, 2, 4, 2);
@@ -612,8 +607,8 @@ public class FloatingModMenuService extends Service {
         gradienteOff.setColor(Color.parseColor("#000000"));
         gradienteOff.setCornerRadii(new float[] { 40, 40, 40, 40, 80, 80, 80, 80 });
         /*if (Build.VERSION.SDK_INT >= 21) {
-		 button.setElevation(90.0f);
-		 }*/
+                 button.setElevation(90.0f);
+                 }*/
         final GradientDrawable gradientDrawable = gradienteOff;
         final RippleDrawable GIDDGID_RE = new RippleDrawable(new ColorStateList(new int[][]{new int[]{}}, new int[]{ Color.RED}), gradienteOff, null);
         gradientDrawable.setOrientation(GradientDrawable.Orientation.TL_BR);
@@ -637,8 +632,8 @@ public class FloatingModMenuService extends Service {
                             RippleDrawable GIDDGID_RE2 = new RippleDrawable(new ColorStateList(new int[][]{new int[]{}}, new int[]{ Color.RED}), gradienteOn, null);
                             gradienteOn.setCornerRadii(new float[] { 40, 40, 40, 40, 80, 80, 80, 80 });
                             /*if (Build.VERSION.SDK_INT >= 21) {
-							 button.setElevation(90.0f);
-							 }*/
+                                                         button.setElevation(90.0f);
+                                                         }*/
                             button.setBackground(GIDDGID_RE2);
                             return;
                         }
@@ -651,8 +646,8 @@ public class FloatingModMenuService extends Service {
                         gradienteOff.setCornerRadii(new float[] { 40, 40, 40, 40, 80, 80, 80, 80 });
 
                         /*if (Build.VERSION.SDK_INT >= 21) {
-						 button.setElevation(90.0f);
-						 }*/
+                                                 button.setElevation(90.0f);
+                                                 }*/
                         final GradientDrawable gradientDrawable = gradienteOff;
                         final RippleDrawable GIDDGID_RE = new RippleDrawable(new ColorStateList(new int[][]{new int[]{}}, new int[]{ Color.RED}), gradienteOff, null);
                         gradientDrawable.setOrientation(GradientDrawable.Orientation.TL_BR);
@@ -674,53 +669,53 @@ public class FloatingModMenuService extends Service {
         patches.addView(button);
     }
 
-	public void addButton1(String feature, final InterfaceBtn interfaceBtn) {
-		final Button button = new Button(this);
-		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, dp(35));
-		layoutParams.setMargins(4, 2, 4, 2);
-		button.setLayoutParams(layoutParams);
-		button.setTextSize(11);
-		button.setBackground(Preferences.bbbbb_aaaaaaaa(this));
-		button.setTextColor(-1);
-		button.setGravity(17);
-		button.setTypeface((Typeface) null, 1);
-		if (feature.contains("")) {
-			feature = feature.replace("", "");
-			button.setText(feature + " ON");
-			final String feature2 = feature;
-			button.setOnClickListener(new View.OnClickListener() {
-					private boolean isActive = true;
-					public void onClick(View v) {
-						interfaceBtn.OnWrite();
-						if (isActive) {
-							button.setText(feature2 + " OFF");
-							isActive = false;
-							//Toast.makeText(ctx, Html.fromHtml(feature2 + "<font color='GREEN'>"+" ON</font>"), Toast.LENGTH_SHORT).show();
-							button.setBackground(Preferences.botoes(getBaseContext()));
-							return;
-						}
-						button.setText(feature2 + " ON");
-						isActive = true;
-						//Toast.makeText(ctx, Html.fromHtml(feature2 + "<font color='GREEN'>"+" OFF</font>"), Toast.LENGTH_SHORT).show();
-						button.setBackground(Preferences.bbbbb_aaaaaaaa(getBaseContext()));
-					}
-				});
-		} else {
-			button.setText(feature);
-			final String feature2 = feature;
-			button.setBackground(Preferences.botoes(this));
-			button.setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						interfaceBtn.OnWrite();
-					}
-				});
-		}
-		patches.addView(button);
-	}
+        public void addButton1(String feature, final InterfaceBtn interfaceBtn) {
+                final Button button = new Button(this);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, dp(35));
+                layoutParams.setMargins(4, 2, 4, 2);
+                button.setLayoutParams(layoutParams);
+                button.setTextSize(11);
+                button.setBackground(Preferences.bbbbb_aaaaaaaa(this));
+                button.setTextColor(-1);
+                button.setGravity(17);
+                button.setTypeface((Typeface) null, 1);
+                if (feature.contains("")) {
+                        feature = feature.replace("", "");
+                        button.setText(feature + " ON");
+                        final String feature2 = feature;
+                        button.setOnClickListener(new View.OnClickListener() {
+                                        private boolean isActive = true;
+                                        public void onClick(View v) {
+                                                interfaceBtn.OnWrite();
+                                                if (isActive) {
+                                                        button.setText(feature2 + " OFF");
+                                                        isActive = false;
+                                                        //Toast.makeText(ctx, Html.fromHtml(feature2 + "<font color='GREEN'>"+" ON</font>"), Toast.LENGTH_SHORT).show();
+                                                        button.setBackground(Preferences.botoes(getBaseContext()));
+                                                        return;
+                                                }
+                                                button.setText(feature2 + " ON");
+                                                isActive = true;
+                                                //Toast.makeText(ctx, Html.fromHtml(feature2 + "<font color='GREEN'>"+" OFF</font>"), Toast.LENGTH_SHORT).show();
+                                                button.setBackground(Preferences.bbbbb_aaaaaaaa(getBaseContext()));
+                                        }
+                                });
+                } else {
+                        button.setText(feature);
+                        final String feature2 = feature;
+                        button.setBackground(Preferences.botoes(this));
+                        button.setOnClickListener(new View.OnClickListener() {
+                                        public void onClick(View v) {
+                                                interfaceBtn.OnWrite();
+                                        }
+                                });
+                }
+                patches.addView(button);
+        }
 
 
 
-	private void addSeekbarFly(final String feature, final int prog, int max, final InterfaceInt interInt) {
+        private void addSeekbarFly(final String feature, final int prog, int max, final InterfaceInt interInt) {
         LinearLayout linearLayout = new LinearLayout(this);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, -1);
         linearLayout.setPadding(10, 5, 0, 5);
@@ -738,7 +733,7 @@ public class FloatingModMenuService extends Service {
         textView.setTextSize(11.5f);
         SeekBar seekBar = new SeekBar(this);
         seekBar.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
-		seekBar.getThumb().setColorFilter(Color.parseColor("BLUE"), PorterDuff.Mode.SRC_IN);
+                seekBar.getThumb().setColorFilter(Color.parseColor("BLUE"), PorterDuff.Mode.SRC_IN);
         seekBar.setMax(max);
         seekBar.setProgress(prog);
         final TextView textView2 = textView;
