@@ -14,15 +14,15 @@ LOCAL_LDFLAGS += -Wl,--strip-all
 # Here you add the cpp file
 LOCAL_C_INCLUDES += $(MAIN_LOCAL_PATH)
 LOCAL_SRC_FILES := src/gringo.cpp \
-	src/Substrate/hde64.c \
-	src/Substrate/SubstrateDebug.cpp \
-	src/Substrate/SubstrateHook.cpp \
-	src/Substrate/SubstratePosixMemory.cpp \
-	src/KittyMemory/KittyMemory.cpp \
-	src/KittyMemory/MemoryPatch.cpp \
+        src/Substrate/hde64.c \
+        src/Substrate/SubstrateDebug.cpp \
+        src/Substrate/SubstrateHook.cpp \
+        src/Substrate/SubstratePosixMemory.cpp \
+        src/KittyMemory/KittyMemory.cpp \
+        src/KittyMemory/MemoryPatch.cpp \
     src/KittyMemory/MemoryBackup.cpp \
     src/KittyMemory/KittyUtils.cpp \
-	src/Unity/Vector2.hpp \
+        src/Unity/Vector2.hpp \
     src/Unity/Vector3.hpp \
     src/Unity/Quaternion.hpp \
     

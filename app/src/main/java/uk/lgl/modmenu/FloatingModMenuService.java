@@ -7,6 +7,8 @@ import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.content.res.ColorStateList;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -74,6 +76,13 @@ import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.widget.ProgressBar;
 import android.os.Looper;
+import android.provider.Settings;
+import android.content.SharedPreferences;
+import org.json.JSONObject;
+import org.json.JSONException;
+import java.io.OutputStreamWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import android.graphics.drawable.BitmapDrawable;
 import static uk.lgl.modmenu.StaticActivity.cacheDir;
@@ -101,21 +110,332 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_LEFT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;
 public class FloatingModMenuService extends Service {
-        // ImGui Style Colors
-    final int TEXT_COLOR = Color.parseColor("#FFFFFF");
-    final int TEXT_COLOR_2 = Color.parseColor("#B3B3B3");
-    final int IMGUI_ACCENT = Color.parseColor("#1E90FF");
-    final int IMGUI_BG_DARK = Color.parseColor("#1E1E1E");
-    final int IMGUI_BG_DARKER = Color.parseColor("#161616");
-    final int IMGUI_BORDER = Color.parseColor("#3A3A3A");
-    final int BTN_COLOR = Color.parseColor("#2D2D2D");
-    final int MENU_BG_COLOR = Color.parseColor("#E8161616"); //#AARRGGBB
-    final int MENU_FEATURE_BG_COLOR = Color.parseColor("#FF1E1E1E"); //#AARRGGBB
-    final int MENU_WIDTH = 320;
+    
+    // PREMIUM IMGUI THEME SYSTEM - Professional Grade UI
+    public static class UITheme {
+        // Premium Dark Color Palette
+        public static final int BG_PRIMARY = Color.parseColor("#0d1117");      // Deep dark background
+        public static final int BG_SECONDARY = Color.parseColor("#161b22");    // Secondary panels
+        public static final int BG_TERTIARY = Color.parseColor("#21262d");     // Elevated surfaces
+        public static final int BG_OVERLAY = Color.parseColor("#1c2128");      // Overlay surfaces
+        
+        // Accent & Interactive Colors
+        public static final int ACCENT_PRIMARY = Color.parseColor("#238636");   // Success green
+        public static final int ACCENT_DANGER = Color.parseColor("#da3633");    // Danger red  
+        public static final int ACCENT_WARNING = Color.parseColor("#d29922");   // Warning orange
+        public static final int ACCENT_INFO = Color.parseColor("#1f6feb");      // Info blue
+        public static final int ACCENT_PURPLE = Color.parseColor("#8957e5");    // Premium purple
+        
+        // Text Colors
+        public static final int TEXT_PRIMARY = Color.parseColor("#f0f6fc");     // Primary text
+        public static final int TEXT_SECONDARY = Color.parseColor("#8b949e");   // Secondary text
+        public static final int TEXT_MUTED = Color.parseColor("#6e7681");       // Muted text
+        public static final int TEXT_ON_ACCENT = Color.parseColor("#ffffff");   // Text on colored backgrounds
+        
+        // Border & Outline Colors
+        public static final int BORDER_DEFAULT = Color.parseColor("#30363d");   // Default borders
+        public static final int BORDER_SUBTLE = Color.parseColor("#21262d");    // Subtle borders
+        public static final int BORDER_ACCENT = Color.parseColor("#f78166");    // Accent borders
+        
+        // Interactive States
+        public static final int STATE_HOVER = Color.parseColor("#262c36");      // Hover state
+        public static final int STATE_PRESSED = Color.parseColor("#2f353e");    // Pressed state
+        public static final int STATE_FOCUSED = Color.parseColor("#344155");    // Focused state
+        public static final int STATE_DISABLED = Color.parseColor("#484f58");   // Disabled state
+        
+        // Shadow & Elevation
+        public static final int SHADOW_COLOR = Color.parseColor("#000000");     // Shadow color
+        public static final int GLOW_COLOR = Color.parseColor("#238636");       // Glow effect
+        
+        // Spacing & Dimensions  
+        public static final int RADIUS_SMALL = 4;
+        public static final int RADIUS_MEDIUM = 6;
+        public static final int RADIUS_LARGE = 8;
+        public static final int RADIUS_XLARGE = 12;
+        
+        public static final int ELEVATION_LOW = 2;
+        public static final int ELEVATION_MEDIUM = 4;
+        public static final int ELEVATION_HIGH = 8;
+        public static final int ELEVATION_FLOATING = 16;
+        
+        public static final int PADDING_XS = 4;
+        public static final int PADDING_SM = 8;
+        public static final int PADDING_MD = 12;
+        public static final int PADDING_LG = 16;
+        public static final int PADDING_XL = 24;
+        
+        public static final int STROKE_THIN = 1;
+        public static final int STROKE_MEDIUM = 2;
+        public static final int STROKE_THICK = 3;
+        
+        // Typography Sizes
+        public static final float TEXT_SIZE_SMALL = 9f;
+        public static final float TEXT_SIZE_MEDIUM = 11f;
+        public static final float TEXT_SIZE_LARGE = 13f;
+        public static final float TEXT_SIZE_TITLE = 15f;
+        public static final float TEXT_SIZE_HEADER = 17f;
+    }
+    
+    // Legacy color compatibility - Updated to use premium theme
+    final int TEXT_COLOR = UITheme.TEXT_PRIMARY;
+    final int TEXT_COLOR_2 = UITheme.TEXT_SECONDARY;
+    final int IMGUI_ACCENT = UITheme.ACCENT_INFO;
+    final int IMGUI_BG_DARK = UITheme.BG_PRIMARY;
+    final int IMGUI_BG_DARKER = UITheme.BG_SECONDARY;
+    final int IMGUI_BORDER = UITheme.BORDER_DEFAULT;
+    final int BTN_COLOR = UITheme.BG_TERTIARY;
+    final int MENU_BG_COLOR = Color.parseColor("#E8" + Integer.toHexString(UITheme.BG_SECONDARY).substring(2)); //#AARRGGBB
+    final int MENU_FEATURE_BG_COLOR = Color.parseColor("#FF" + Integer.toHexString(UITheme.BG_PRIMARY).substring(2)); //#AARRGGBB
+    final int MENU_WIDTH = 340; // Slightly wider for premium feel
     final int MENU_HEIGHT = 400;
     final float MENU_CORNER = 20f;
     final int ICON_SIZE = 50;
     final float ICON_ALPHA = 0.5f; //Transparent
+    
+    // 🏭 PREMIUM UI COMPONENT FACTORY - Professional IMGUI Widgets
+    public class UIComponentFactory {
+        private Context context;
+        
+        public UIComponentFactory(Context context) {
+            this.context = context;
+        }
+        
+        // Premium Primary Button - Main actions
+        public Button createPrimaryButton(String text, View.OnClickListener listener) {
+            Button button = new Button(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp(36));
+            params.setMargins(dp(UITheme.PADDING_SM), dp(UITheme.PADDING_XS), dp(UITheme.PADDING_SM), dp(UITheme.PADDING_XS));
+            button.setLayoutParams(params);
+            button.setText(text);
+            button.setTextColor(UITheme.TEXT_ON_ACCENT);
+            button.setTextSize(UITheme.TEXT_SIZE_MEDIUM);
+            button.setTypeface(Typeface.DEFAULT_BOLD);
+            button.setGravity(Gravity.CENTER);
+            button.setAllCaps(false);
+            
+            // Premium gradient background
+            GradientDrawable bg = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{UITheme.ACCENT_PRIMARY, Color.parseColor("#1a6e2a")}
+            );
+            bg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
+            bg.setStroke(dp(UITheme.STROKE_THIN), UITheme.BORDER_ACCENT);
+            button.setBackground(bg);
+            
+            if (listener != null) button.setOnClickListener(listener);
+            return button;
+        }
+        
+        // Premium Toggle Button - Mod features with state
+        public Button createToggleButton(final String featureName, final InterfaceBtn callback) {
+            Button button = new Button(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp(36));
+            params.setMargins(dp(UITheme.PADDING_SM), dp(UITheme.PADDING_XS), dp(UITheme.PADDING_SM), dp(UITheme.PADDING_XS));
+            button.setLayoutParams(params);
+            button.setPadding(dp(UITheme.PADDING_MD), dp(UITheme.PADDING_SM), dp(UITheme.PADDING_MD), dp(UITheme.PADDING_SM));
+            button.setTextSize(UITheme.TEXT_SIZE_MEDIUM);
+            button.setTextColor(UITheme.TEXT_PRIMARY);
+            button.setTypeface(Typeface.DEFAULT);
+            button.setGravity(Gravity.CENTER);
+            button.setAllCaps(false);
+            
+            // Initial OFF state
+            button.setText(featureName + " OFF");
+            GradientDrawable offBg = new GradientDrawable();
+            offBg.setColor(UITheme.BG_TERTIARY);
+            offBg.setStroke(dp(UITheme.STROKE_THIN), UITheme.BORDER_DEFAULT);
+            offBg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
+            button.setBackground(offBg);
+            
+            button.setOnClickListener(new View.OnClickListener() {
+                boolean isOn = false;
+                public void onClick(View view) {
+                    isOn = !isOn;
+                    if (isOn) {
+                        button.setText(featureName + " ON");
+                        button.setTextColor(UITheme.TEXT_ON_ACCENT);
+                        GradientDrawable onBg = new GradientDrawable(
+                            GradientDrawable.Orientation.LEFT_RIGHT,
+                            new int[]{UITheme.ACCENT_PRIMARY, UITheme.ACCENT_INFO}
+                        );
+                        onBg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
+                        onBg.setStroke(dp(UITheme.STROKE_MEDIUM), UITheme.GLOW_COLOR);
+                        button.setBackground(onBg);
+                    } else {
+                        button.setText(featureName + " OFF");
+                        button.setTextColor(UITheme.TEXT_PRIMARY);
+                        GradientDrawable offBg = new GradientDrawable();
+                        offBg.setColor(UITheme.BG_TERTIARY);
+                        offBg.setStroke(dp(UITheme.STROKE_THIN), UITheme.BORDER_DEFAULT);
+                        offBg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
+                        button.setBackground(offBg);
+                    }
+                    // CRITICAL: Execute callback containing Changes(featureIndex, 0) 
+                    // The feature index is preserved in the closure from CreateMenuList()
+                    if (callback != null) callback.OnWrite();
+                }
+            });
+            
+            return button;
+        }
+        
+        // Direct Feature Index Toggle Button - For explicit feature control
+        public Button createFeatureToggleButton(final String featureName, final int featureIndex) {
+            Button button = new Button(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp(36));
+            params.setMargins(dp(UITheme.PADDING_SM), dp(UITheme.PADDING_XS), dp(UITheme.PADDING_SM), dp(UITheme.PADDING_XS));
+            button.setLayoutParams(params);
+            button.setPadding(dp(UITheme.PADDING_MD), dp(UITheme.PADDING_SM), dp(UITheme.PADDING_MD), dp(UITheme.PADDING_SM));
+            button.setTextSize(UITheme.TEXT_SIZE_MEDIUM);
+            button.setTextColor(UITheme.TEXT_PRIMARY);
+            button.setTypeface(Typeface.DEFAULT);
+            button.setGravity(Gravity.CENTER);
+            button.setAllCaps(false);
+            
+            // Initial OFF state
+            button.setText(featureName + " OFF");
+            GradientDrawable offBg = new GradientDrawable();
+            offBg.setColor(UITheme.BG_TERTIARY);
+            offBg.setStroke(dp(UITheme.STROKE_THIN), UITheme.BORDER_DEFAULT);
+            offBg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
+            button.setBackground(offBg);
+            
+            button.setOnClickListener(new View.OnClickListener() {
+                boolean isOn = false;
+                public void onClick(View view) {
+                    isOn = !isOn;
+                    if (isOn) {
+                        button.setText(featureName + " ON");
+                        button.setTextColor(UITheme.TEXT_ON_ACCENT);
+                        GradientDrawable onBg = new GradientDrawable(
+                            GradientDrawable.Orientation.LEFT_RIGHT,
+                            new int[]{UITheme.ACCENT_PRIMARY, UITheme.ACCENT_INFO}
+                        );
+                        onBg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
+                        onBg.setStroke(dp(UITheme.STROKE_MEDIUM), UITheme.GLOW_COLOR);
+                        button.setBackground(onBg);
+                        // CRITICAL: Call Changes with ON state (value=1)
+                        Changes(featureIndex, 1);
+                    } else {
+                        button.setText(featureName + " OFF");
+                        button.setTextColor(UITheme.TEXT_PRIMARY);
+                        GradientDrawable offBg = new GradientDrawable();
+                        offBg.setColor(UITheme.BG_TERTIARY);
+                        offBg.setStroke(dp(UITheme.STROKE_THIN), UITheme.BORDER_DEFAULT);
+                        offBg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
+                        button.setBackground(offBg);
+                        // CRITICAL: Call Changes with OFF state (value=0)
+                        Changes(featureIndex, 0);
+                    }
+                }
+            });
+            
+            return button;
+        }
+        
+        // Premium Slider Row - Value adjustments with live preview
+        public LinearLayout createSliderRow(final String name, final int min, final int max, final InterfaceInt callback) {
+            LinearLayout container = new LinearLayout(context);
+            container.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(50)));
+            container.setOrientation(LinearLayout.VERTICAL);
+            container.setPadding(dp(UITheme.PADDING_MD), dp(UITheme.PADDING_SM), dp(UITheme.PADDING_MD), dp(UITheme.PADDING_SM));
+            
+            // Premium card background
+            GradientDrawable cardBg = new GradientDrawable();
+            cardBg.setColor(UITheme.BG_OVERLAY);
+            cardBg.setStroke(dp(UITheme.STROKE_THIN), UITheme.BORDER_SUBTLE);
+            cardBg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
+            container.setBackground(cardBg);
+            
+            // Value label with live update
+            final TextView label = new TextView(context);
+            label.setText(name + ": " + min);
+            label.setTextColor(UITheme.TEXT_PRIMARY);
+            label.setTextSize(UITheme.TEXT_SIZE_MEDIUM);
+            label.setTypeface(Typeface.DEFAULT_BOLD);
+            
+            // Premium seekbar
+            SeekBar seekBar = new SeekBar(context);
+            seekBar.setMax(max - min);
+            seekBar.setProgress(0);
+            
+            // Custom seekbar styling
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    int value = min + progress;
+                    label.setText(name + ": " + value);
+                    // CRITICAL: Execute callback containing Changes(featureIndex, value)
+                    // The feature index is preserved in the closure from CreateMenuList()
+                    // For sliders, the native code assigns value directly (e.g., Aim_Fov = value)
+                    if (callback != null && fromUser) callback.OnWrite(value);
+                }
+                public void onStartTrackingTouch(SeekBar seekBar) {}
+                public void onStopTrackingTouch(SeekBar seekBar) {}
+            });
+            
+            container.addView(label);
+            container.addView(seekBar);
+            return container;
+        }
+        
+        // 📑 Premium Tab Button - Navigation with indicator
+        public Button createTabButton(String text, int index, View.OnClickListener listener) {
+            Button tab = new Button(context);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(32), 1.0f);
+            params.setMargins(dp(2), 0, dp(2), 0);
+            tab.setLayoutParams(params);
+            tab.setText(text);
+            tab.setTextSize(UITheme.TEXT_SIZE_SMALL);
+            tab.setTextColor(UITheme.TEXT_SECONDARY);
+            tab.setTypeface(Typeface.DEFAULT_BOLD);
+            tab.setAllCaps(false);
+            tab.setPadding(0, 0, 0, 0);
+            
+            // Inactive tab styling
+            GradientDrawable inactiveBg = new GradientDrawable();
+            inactiveBg.setColor(UITheme.BG_TERTIARY);
+            inactiveBg.setStroke(dp(UITheme.STROKE_THIN), UITheme.BORDER_DEFAULT);
+            inactiveBg.setCornerRadius(dp(UITheme.RADIUS_SMALL));
+            tab.setBackground(inactiveBg);
+            
+            if (listener != null) tab.setOnClickListener(listener);
+            return tab;
+        }
+        
+        // 🏷️ Premium Section Card - Group related features
+        public LinearLayout createSectionCard(String title) {
+            LinearLayout card = new LinearLayout(context);
+            card.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+            card.setOrientation(LinearLayout.VERTICAL);
+            card.setPadding(dp(UITheme.PADDING_MD), dp(UITheme.PADDING_MD), dp(UITheme.PADDING_MD), dp(UITheme.PADDING_MD));
+            
+            // Premium card background with subtle elevation
+            GradientDrawable cardBg = new GradientDrawable();
+            cardBg.setColor(UITheme.BG_SECONDARY);
+            cardBg.setStroke(dp(UITheme.STROKE_THIN), UITheme.BORDER_DEFAULT);
+            cardBg.setCornerRadius(dp(UITheme.RADIUS_LARGE));
+            card.setBackground(cardBg);
+            
+            // Section title
+            if (title != null && !title.isEmpty()) {
+                TextView titleView = new TextView(context);
+                titleView.setText("📦 " + title);
+                titleView.setTextColor(UITheme.TEXT_PRIMARY);
+                titleView.setTextSize(UITheme.TEXT_SIZE_TITLE);
+                titleView.setTypeface(Typeface.DEFAULT_BOLD);
+                titleView.setPadding(0, 0, 0, dp(UITheme.PADDING_SM));
+                card.addView(titleView);
+                
+                // Divider line
+                View divider = new View(context);
+                divider.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(1)));
+                divider.setBackgroundColor(UITheme.BORDER_ACCENT);
+                card.addView(divider);
+            }
+            
+            return card;
+        }
+    }
     private MediaPlayer FXPlayer;
     public View mFloatingView;
     private Button close;
@@ -137,12 +457,28 @@ public class FloatingModMenuService extends Service {
     private FrameLayout rootFrame;
     private ImageView startimage;
     private Button toggleBtn;
-    private LinearLayout imguiBar;
+    
+    // Premium UI Factory Instance
+    private UIComponentFactory componentFactory;
+    private RelativeLayout imguiBar;
+    private LinearLayout contentPanel;
+    private boolean isExpanded = false;
         private Drawable imagem;
         private Drawable logo;
     private LinearLayout view1;
     private LinearLayout view2;
         private GradientDrawable thumb;
+    
+    // Authentication variables
+    private boolean isAuthenticated = false;
+    private RelativeLayout loginContainer;
+    private EditText licenseKeyInput;
+    private Button pasteBtn;
+    private Button accessBtn;
+    private final String LICENSE_SERVER_URL = "https://panel-nl2x.onrender.com/api/verify";
+    private final String GAME_NAME = "PUBG MOBILE";
+    private final String PREFS_NAME = "ModMenuPrefs";
+    private final String DEVICE_ID_KEY = "unique_device_id";
 
         //Canvas 
         private ESPView overlayView;
@@ -220,9 +556,387 @@ public class FloatingModMenuService extends Service {
                  handler.postDelayed(this, 1000);*/
     }
 
+    private void createLoginInterface() {
+        // Premium card container - optimized smaller size
+        loginContainer = new RelativeLayout(getBaseContext());
+        loginContainer.setLayoutParams(new RelativeLayout.LayoutParams(dp(280), -2));
+        loginContainer.setPadding(dp(16), dp(16), dp(16), dp(16));
+        
+        // Premium card background with elevation and semi-transparency
+        GradientDrawable loginBg = new GradientDrawable();
+        loginBg.setColor(Color.parseColor("#CC1E1E1E")); // Semi-transparent background
+        loginBg.setStroke(dp(1), IMGUI_BORDER);
+        loginBg.setCornerRadius(dp(10));
+        loginContainer.setBackground(loginBg);
+        
+        // Add elevation for premium look (reduced for smaller card)
+        if (Build.VERSION.SDK_INT >= 21) {
+            loginContainer.setElevation(dp(6));
+        }
+        
+        // Vertical content layout for reliable positioning
+        LinearLayout contentLayout = new LinearLayout(getBaseContext());
+        contentLayout.setLayoutParams(new RelativeLayout.LayoutParams(-1, -2));
+        contentLayout.setOrientation(LinearLayout.VERTICAL);
+        contentLayout.setGravity(Gravity.CENTER_HORIZONTAL);
+        
+        // Premium title with subtitle (optimized size)
+        TextView titleText = new TextView(getBaseContext());
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(-2, -2);
+        titleParams.bottomMargin = dp(3);
+        titleText.setLayoutParams(titleParams);
+        titleText.setText("DEXX-TER");
+        titleText.setTextColor(IMGUI_ACCENT);
+        titleText.setTextSize(18f);
+        titleText.setTypeface(null, Typeface.BOLD);
+        titleText.setGravity(Gravity.CENTER);
+        
+        // Premium subtitle (optimized)
+        TextView subtitleText = new TextView(getBaseContext());
+        LinearLayout.LayoutParams subtitleParams = new LinearLayout.LayoutParams(-2, -2);
+        subtitleParams.bottomMargin = dp(16);
+        subtitleText.setLayoutParams(subtitleParams);
+        subtitleText.setText("Premium Access");
+        subtitleText.setTextColor(TEXT_COLOR_2);
+        subtitleText.setTextSize(11f);
+        subtitleText.setGravity(Gravity.CENTER);
+        
+        // Premium license key input with optimized sizing
+        licenseKeyInput = new EditText(getBaseContext());
+        LinearLayout.LayoutParams inputParams = new LinearLayout.LayoutParams(-1, dp(42));
+        inputParams.bottomMargin = dp(12);
+        licenseKeyInput.setLayoutParams(inputParams);
+        licenseKeyInput.setHint("Enter License Key");
+        licenseKeyInput.setTextColor(TEXT_COLOR);
+        licenseKeyInput.setHintTextColor(TEXT_COLOR_2);
+        licenseKeyInput.setTextSize(13f);
+        licenseKeyInput.setPadding(dp(10), dp(10), dp(10), dp(10));
+        licenseKeyInput.setSingleLine(true);
+        
+        // Premium input styling with focus state (optimized)
+        GradientDrawable inputBg = new GradientDrawable();
+        inputBg.setColor(BTN_COLOR);
+        inputBg.setStroke(dp(1), IMGUI_BORDER);
+        inputBg.setCornerRadius(dp(6));
+        licenseKeyInput.setBackground(inputBg);
+        
+        // Focus state for premium feel
+        licenseKeyInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                GradientDrawable bg = new GradientDrawable();
+                bg.setColor(BTN_COLOR);
+                bg.setStroke(dp(1), hasFocus ? IMGUI_ACCENT : IMGUI_BORDER);
+                bg.setCornerRadius(dp(8));
+                v.setBackground(bg);
+            }
+        });
+        
+        // Premium horizontal button row (optimized)
+        LinearLayout buttonRow = new LinearLayout(getBaseContext());
+        LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(-1, dp(40));
+        buttonRow.setLayoutParams(rowParams);
+        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
+        buttonRow.setWeightSum(2f);
+        
+        // Premium PASTE button (secondary style, optimized)
+        pasteBtn = new Button(getBaseContext());
+        LinearLayout.LayoutParams pasteParams = new LinearLayout.LayoutParams(0, -1);
+        pasteParams.weight = 1f;
+        pasteParams.rightMargin = dp(6);
+        pasteBtn.setLayoutParams(pasteParams);
+        pasteBtn.setText("PASTE");
+        pasteBtn.setTextColor(IMGUI_ACCENT);
+        pasteBtn.setTextSize(12f);
+        pasteBtn.setTypeface(null, Typeface.BOLD);
+        pasteBtn.setAllCaps(true);
+        
+        // Secondary button styling with outline (optimized)
+        GradientDrawable pasteBg = new GradientDrawable();
+        pasteBg.setColor(Color.TRANSPARENT);
+        pasteBg.setStroke(dp(1), IMGUI_ACCENT);
+        pasteBg.setCornerRadius(dp(6));
+        pasteBtn.setBackground(pasteBg);
+        
+        // Premium ACCESS button (primary style, optimized)
+        accessBtn = new Button(getBaseContext());
+        LinearLayout.LayoutParams accessParams = new LinearLayout.LayoutParams(0, -1);
+        accessParams.weight = 1f;
+        accessParams.leftMargin = dp(6);
+        accessBtn.setLayoutParams(accessParams);
+        accessBtn.setText("ACCESS");
+        accessBtn.setTextColor(Color.WHITE);
+        accessBtn.setTextSize(12f);
+        accessBtn.setTypeface(null, Typeface.BOLD);
+        accessBtn.setAllCaps(true);
+        
+        // Primary button styling - solid accent color (optimized)
+        GradientDrawable accessBg = new GradientDrawable();
+        accessBg.setColor(IMGUI_ACCENT);
+        accessBg.setCornerRadius(dp(6));
+        accessBtn.setBackground(accessBg);
+        
+        // Add ripple effect for premium feel (API 23+)
+        if (Build.VERSION.SDK_INT >= 23) {
+            // Add ripple to buttons
+            pasteBtn.setForeground(createRipple(Color.parseColor("#20FFFFFF")));
+            accessBtn.setForeground(createRipple(Color.parseColor("#20FFFFFF")));
+        }
+        
+        // Add all elements to content layout
+        contentLayout.addView(titleText);
+        contentLayout.addView(subtitleText);
+        contentLayout.addView(licenseKeyInput);
+        buttonRow.addView(pasteBtn);
+        buttonRow.addView(accessBtn);
+        contentLayout.addView(buttonRow);
+        
+        // Add content layout to login container
+        loginContainer.addView(contentLayout);
+        
+        // Set click listeners
+        pasteBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard != null && clipboard.hasPrimaryClip() && 
+                    clipboard.getPrimaryClip().getItemCount() > 0) {
+                    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+                    CharSequence text = item.getText();
+                    if (text != null) {
+                        licenseKeyInput.setText(text.toString());
+                        Toast.makeText(FloatingModMenuService.this, "License key pasted!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(FloatingModMenuService.this, "Clipboard contains non-text content!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(FloatingModMenuService.this, "Clipboard is empty!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        
+        accessBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String enteredKey = licenseKeyInput.getText().toString().trim();
+                
+                if (enteredKey.isEmpty()) {
+                    Toast.makeText(FloatingModMenuService.this, "Please enter a license key", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                // Try online verification first
+                verifyLicenseOnline(enteredKey);
+            }
+        });
+    }
+    
+    // Helper method for creating ripple effects
+    private Drawable createRipple(int color) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            return new android.graphics.drawable.RippleDrawable(
+                ColorStateList.valueOf(color), null, null);
+        }
+        return null;
+    }
+
+    // Generate unique device ID
+    private String generateUniqueDeviceId() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String savedDeviceId = prefs.getString(DEVICE_ID_KEY, null);
+        
+        if (savedDeviceId != null) {
+            return savedDeviceId;
+        }
+        
+        try {
+            // Combine multiple device identifiers for uniqueness
+            String androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            String buildSerial = Build.SERIAL;
+            String buildModel = Build.MODEL;
+            String buildManufacturer = Build.MANUFACTURER;
+            
+            // Create unique string from device info
+            String deviceInfo = androidId + buildSerial + buildModel + buildManufacturer;
+            
+            // Hash the device info to create consistent device ID
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(deviceInfo.getBytes());
+            
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            
+            String deviceId = hexString.toString().substring(0, 32); // Use first 32 chars
+            
+            // Save device ID for future use
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(DEVICE_ID_KEY, deviceId);
+            editor.apply();
+            
+            return deviceId;
+            
+        } catch (NoSuchAlgorithmException e) {
+            // Fallback to simpler method if SHA-256 not available
+            String fallbackId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+            if (fallbackId == null) {
+                fallbackId = Build.SERIAL + Build.MODEL;
+            }
+            
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(DEVICE_ID_KEY, fallbackId);
+            editor.apply();
+            
+            return fallbackId;
+        }
+    }
+
+    // Verify license with server
+    private void verifyLicenseOnline(String licenseKey) {
+        final String finalLicenseKey = licenseKey;
+        final String finalDeviceId = generateUniqueDeviceId();
+        
+        // Show loading state
+        accessBtn.setText("VERIFYING...");
+        accessBtn.setEnabled(false);
+        
+        // Create background task for network request
+        new AsyncTask<Void, Void, Boolean>() {
+            private String errorMessage = "";
+            
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                try {
+                    // Create JSON payload
+                    JSONObject payload = new JSONObject();
+                    payload.put("key", finalLicenseKey);
+                    payload.put("deviceId", finalDeviceId);
+                    payload.put("game", GAME_NAME);
+                    
+                    // Setup HTTP connection
+                    URL url = new URL(LICENSE_SERVER_URL);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setDoOutput(true);
+                    conn.setConnectTimeout(10000); // 10 second timeout
+                    conn.setReadTimeout(10000);
+                    
+                    // Send request
+                    OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
+                    writer.write(payload.toString());
+                    writer.flush();
+                    writer.close();
+                    
+                    // Read response
+                    int responseCode = conn.getResponseCode();
+                    
+                    BufferedReader reader;
+                    if (responseCode >= 200 && responseCode < 300) {
+                        reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    } else {
+                        reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    }
+                    
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    reader.close();
+                    
+                    // Parse JSON response
+                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    
+                    if (jsonResponse.has("valid") && jsonResponse.getBoolean("valid")) {
+                        // License verified successfully - no persistent storage
+                        return true;
+                    } else {
+                        if (jsonResponse.has("message")) {
+                            errorMessage = jsonResponse.getString("message");
+                        } else {
+                            errorMessage = "License verification failed";
+                        }
+                        return false;
+                    }
+                    
+                } catch (JSONException e) {
+                    errorMessage = "Invalid server response";
+                    Log.e("LicenseVerify", "JSON error: " + e.getMessage());
+                    return false;
+                } catch (Exception e) {
+                    errorMessage = "Network error: " + e.getMessage();
+                    Log.e("LicenseVerify", "Network error: " + e.getMessage());
+                    return false;
+                }
+            }
+            
+            @Override
+            protected void onPostExecute(Boolean success) {
+                // Reset button state
+                accessBtn.setText("ACCESS");
+                accessBtn.setEnabled(true);
+                
+                if (success) {
+                    isAuthenticated = true;
+                    Toast.makeText(FloatingModMenuService.this, "License verified! Welcome to DEXX-TER", Toast.LENGTH_SHORT).show();
+                    showMainInterface();
+                } else {
+                    Toast.makeText(FloatingModMenuService.this, "Error: " + errorMessage, Toast.LENGTH_LONG).show();
+                    licenseKeyInput.setText("");
+                    
+                }
+            }
+        }.execute();
+    }
+    
+    
+    private void showMainInterface() {
+        // Remove login interface
+        if (loginContainer != null && mRootContainer != null) {
+            mRootContainer.removeView(loginContainer);
+        }
+        // Initialize main mod menu interface
+        initMainInterface();
+    }
+
     private void initFloating() {
-        rootFrame = new FrameLayout(getBaseContext()); // Global markup
-        mRootContainer = new RelativeLayout(getBaseContext()); // Markup on which two markups of the icon and the menu itself will be placed
+        // Initialize basic containers
+        rootFrame = new FrameLayout(getBaseContext());
+        mRootContainer = new RelativeLayout(getBaseContext());
+        rootFrame.setLayoutParams(new FrameLayout.LayoutParams(-1, -1));
+        mRootContainer.setLayoutParams(new FrameLayout.LayoutParams(-2, -2));
+        
+        // Add root container to frame
+        rootFrame.addView(mRootContainer);
+        mFloatingView = rootFrame;
+        
+        // Initialize Premium UI Component Factory
+        componentFactory = new UIComponentFactory(getBaseContext());
+        
+        // Always require online authentication - no persistent sessions
+        createLoginInterface();
+        mRootContainer.addView(loginContainer);
+        
+        // Add floating view to window manager
+        if (Build.VERSION.SDK_INT >= 26) {
+            params = new WindowManager.LayoutParams(-2, -2, 2038, 8, -3);
+        } else {
+            params = new WindowManager.LayoutParams(-2, -2, 2002, 8, -3);
+        }
+        
+        params.gravity = Gravity.CENTER;
+        params.x = 0;
+        params.y = 0;
+        mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager.addView(mFloatingView, params);
+    }
+
+    private void initMainInterface() {
+        
         mCollapsed = new RelativeLayout(getBaseContext()); // Markup of the icon (when the menu is minimized)
         mExpanded = new LinearLayout(getBaseContext()); // Menu markup (when the menu is expanded)
                 AssetManager assetManager = getAssets();
@@ -231,59 +945,63 @@ public class FloatingModMenuService extends Service {
                 patches2 = new LinearLayout(getBaseContext());
         view2 = new LinearLayout(getBaseContext());
         mButtonPanel = new LinearLayout(getBaseContext()); // Layout of option buttons (when the menu is expanded)
-                /*
-                 Toast.makeText(this, (Html.fromHtml("AutoBypass Activated!!!!")), Toast.LENGTH_LONG).show();
-                 Toast.makeText(this, (Html.fromHtml("Functions Will Load Soon After Bypass..........")), Toast.LENGTH_LONG).show();
-                 */
 
         mButtonPanel = new LinearLayout(getBaseContext());
-        rootFrame.setLayoutParams(new FrameLayout.LayoutParams(-1, -1));
-                mRootContainer.setLayoutParams(new FrameLayout.LayoutParams(-2, -2));
                 mCollapsed.setLayoutParams(new RelativeLayout.LayoutParams(-2, -2));
                 mCollapsed.setVisibility(View.VISIBLE);
 
-        // Create ImGui-style thin bar instead of image
-        LinearLayout imguiBar = new LinearLayout(getBaseContext());
-        LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(dp(180), dp(28));
+        // Create persistent ImGui-style bar: [‣ button at start][DEXX-TER centered][empty space]
+        imguiBar = new RelativeLayout(getBaseContext());
+        LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(dp(220), dp(28));
         barParams.topMargin = dp(15);
         imguiBar.setLayoutParams(barParams);
-        imguiBar.setOrientation(LinearLayout.HORIZONTAL);
-        imguiBar.setPadding(dp(8), dp(4), dp(8), dp(4));
+        imguiBar.setPadding(dp(4), dp(4), dp(4), dp(4));
         
-        // ImGui bar background
-        GradientDrawable barBg = new GradientDrawable();
-        barBg.setColor(IMGUI_BG_DARK);
-        barBg.setStroke(dp(1), IMGUI_BORDER);
-        barBg.setCornerRadius(dp(4));
+        // Premium IMGUI Bar Background with Gradient
+        GradientDrawable barBg = new GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            new int[]{UITheme.BG_SECONDARY, UITheme.BG_PRIMARY}
+        );
+        barBg.setStroke(dp(UITheme.STROKE_MEDIUM), UITheme.BORDER_ACCENT);
+        barBg.setCornerRadius(dp(UITheme.RADIUS_LARGE));
         imguiBar.setBackground(barBg);
         
-        // DEXX-TER text
-        TextView imguiTitle = new TextView(getBaseContext());
-        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, -2, 1f);
-        imguiTitle.setLayoutParams(titleParams);
-        imguiTitle.setText("DEXX-TER");
-        imguiTitle.setTextColor(TEXT_COLOR);
-        imguiTitle.setTextSize(12f);
-        imguiTitle.setTypeface(null, Typeface.BOLD);
-        imguiTitle.setGravity(Gravity.CENTER_VERTICAL);
-        
-        // Toggle button (▶)
+        // Toggle button at START of bar (‣/▼)
         toggleBtn = new Button(getBaseContext());
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(dp(24), dp(20));
+        RelativeLayout.LayoutParams btnParams = new RelativeLayout.LayoutParams(dp(24), dp(20));
+        btnParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        btnParams.addRule(RelativeLayout.CENTER_VERTICAL);
         toggleBtn.setLayoutParams(btnParams);
-        toggleBtn.setText("▶");
-        toggleBtn.setTextColor(IMGUI_ACCENT);
-        toggleBtn.setTextSize(10f);
+        toggleBtn.setText("‣");
+        toggleBtn.setTextColor(UITheme.ACCENT_PRIMARY);
+        toggleBtn.setTextSize(UITheme.TEXT_SIZE_MEDIUM);
         toggleBtn.setPadding(0, 0, 0, 0);
         toggleBtn.setGravity(Gravity.CENTER);
+        toggleBtn.setAllCaps(false);
         
-        GradientDrawable btnBg = new GradientDrawable();
-        btnBg.setColor(BTN_COLOR);
-        btnBg.setCornerRadius(dp(2));
+        // Premium Toggle Button with Gradient
+        GradientDrawable btnBg = new GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT,
+            new int[]{UITheme.ACCENT_PRIMARY, UITheme.ACCENT_INFO}
+        );
+        btnBg.setStroke(dp(UITheme.STROKE_THIN), UITheme.GLOW_COLOR);
+        btnBg.setCornerRadius(dp(UITheme.RADIUS_MEDIUM));
         toggleBtn.setBackground(btnBg);
         
-        imguiBar.addView(imguiTitle);
+        // Premium Title with Gradient Text Effect
+        TextView imguiTitle = new TextView(getBaseContext());
+        RelativeLayout.LayoutParams titleParams = new RelativeLayout.LayoutParams(-2, -2);
+        titleParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+        imguiTitle.setLayoutParams(titleParams);
+        imguiTitle.setText("DEXX-TER");
+        imguiTitle.setTextColor(UITheme.ACCENT_PRIMARY);
+        imguiTitle.setTextSize(UITheme.TEXT_SIZE_LARGE);
+        imguiTitle.setTypeface(null, Typeface.BOLD);
+        imguiTitle.setGravity(Gravity.CENTER);
+        imguiTitle.setShadowLayer(2f, 1f, 1f, UITheme.SHADOW_COLOR);
+        
         imguiBar.addView(toggleBtn);
+        imguiBar.addView(imguiTitle);
         
         // Store reference for later access
         this.imguiBar = imguiBar;
@@ -312,27 +1030,34 @@ public class FloatingModMenuService extends Service {
         ((ViewGroup.MarginLayoutParams) this.BadLogo2.getLayoutParams()).leftMargin = convertDipToPixels(0);
 
 
-                mExpanded = new LinearLayout(this);
-        mExpanded.setVisibility(View.GONE);
-        mExpanded.setBackgroundColor(Color.rgb(0, 0, 0));
-        mExpanded.setOrientation(1);
-        mExpanded.setAlpha(0.95f);
-        // ImGui-style expanded menu background
-        GradientDrawable imguiMenuBg = new GradientDrawable();
-        imguiMenuBg.setColor(IMGUI_BG_DARKER);
-        imguiMenuBg.setStroke(dp(1), IMGUI_BORDER);
-        imguiMenuBg.setCornerRadius(dp(6));
-        mExpanded.setBackground(imguiMenuBg);
-        mExpanded.setPadding(0, 0, 0, 0);
-        mExpanded.setLayoutParams(new LinearLayout.LayoutParams(MENU_WIDTH, -2));
+        // Create expandable content panel that attaches below the bar
+        contentPanel = new LinearLayout(this);
+        contentPanel.setVisibility(View.GONE); // Start collapsed
+        contentPanel.setOrientation(LinearLayout.VERTICAL);
+        contentPanel.setLayoutParams(new LinearLayout.LayoutParams(dp(220), -2));
+        
+        // Premium Content Panel with Elevated Design
+        GradientDrawable contentBg = new GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            new int[]{UITheme.BG_SECONDARY, UITheme.BG_OVERLAY}
+        );
+        contentBg.setStroke(dp(UITheme.STROKE_MEDIUM), UITheme.BORDER_ACCENT);
+        contentBg.setCornerRadii(new float[]{0, 0, 0, 0, dp(UITheme.RADIUS_LARGE), dp(UITheme.RADIUS_LARGE), dp(UITheme.RADIUS_LARGE), dp(UITheme.RADIUS_LARGE)});
+        contentPanel.setBackground(contentBg);
+        contentPanel.setPadding(dp(4), dp(4), dp(4), dp(4));
 
 
         // Create ImGui-style tab system
         createTabSystem();
         
+        // Compact scrollable content for the menu  
         ScrollView scrollView = new ScrollView(this);
-        scrollView.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(185)));
+        scrollView.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(200))); // Compact height
         scrollView.addView(tabContent);
+        
+        // Add tab system and content to the expandable panel
+        contentPanel.addView(tabContainer);
+        contentPanel.addView(scrollView);
 
         // Remove legacy purple divider
         patches.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
@@ -394,45 +1119,34 @@ public class FloatingModMenuService extends Service {
         close.setBackground(imguiCloseBg);
 
         new LinearLayout.LayoutParams(-1, dp(25)).topMargin = dp(2);
-        rootFrame.addView(mRootContainer);
         this.patches.addView(Loading);
-        mRootContainer.addView(mCollapsed);
-        mRootContainer.addView(mExpanded);
-        mCollapsed.addView(imguiBar);
-        mExpanded.addView(title);
-        title.addView(BadLogo2);
-        title.addView(Bar);
-        mExpanded.addView(tabContainer);
-        mExpanded.addView(scrollView);
-        mExpanded.addView(VersaoFF);
-        relativeLayout.addView(close);
-        mFloatingView = rootFrame;
-        mExpanded.addView(relativeLayout);
-
-        if (Build.VERSION.SDK_INT >= 26) {
-            params = new WindowManager.LayoutParams(-2, -2, 2038, 8, -3);
-        } else {
-            params = new WindowManager.LayoutParams(-2, -2, 2002, 8, -3);
-        }
-
-        WindowManager.LayoutParams layoutParams4 = params;
-        layoutParams4.gravity = 51;
-        layoutParams4.x = 0;
-        layoutParams4.y = 50;
-        mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        mWindowManager.addView(mFloatingView, params);
+        // Create single persistent container with bar + content panel
+        LinearLayout mainContainer = new LinearLayout(this);
+        mainContainer.setOrientation(LinearLayout.VERTICAL);
+        mainContainer.setLayoutParams(new LinearLayout.LayoutParams(-2, -2));
+        
+        // Add persistent bar and expandable content panel
+        mainContainer.addView(imguiBar);
+        mainContainer.addView(contentPanel);
+        
+        // Add main container to root
+        mRootContainer.addView(mainContainer);
+        
+        // Update window manager layout for thin bar positioning (top-left)
+        params.gravity = 51;
+        params.x = 0;
+        params.y = 50;
+        mWindowManager.updateViewLayout(mFloatingView, params);
         RelativeLayout relativeLayout2 = mCollapsed;
         LinearLayout linearLayout = mExpanded;
-        mFloatingView.setOnTouchListener(onTouchListener());
+        // Only make the bar draggable (not the toggle button)
         imguiBar.setOnTouchListener(onTouchListener());
         // Don't add touch listener to toggleBtn to avoid click conflicts
-        initMenuButton(relativeLayout2, linearLayout);
+        initMenuButton();
     }
 
     private View.OnTouchListener onTouchListener() {
         return new View.OnTouchListener() {
-            final View collapsedView = mCollapsed;
-            final View expandedView = mExpanded;
             private float initialTouchX;
             private float initialTouchY;
             private int initialX;
@@ -446,18 +1160,7 @@ public class FloatingModMenuService extends Service {
                         initialTouchY = motionEvent.getRawY();
                         return true;
                     case MotionEvent.ACTION_UP:
-                        int rawX = (int) (motionEvent.getRawX() - initialTouchX);
-                        int rawY = (int) (motionEvent.getRawY() - initialTouchY);
-                        //The check for Xdiff <10 && YDiff< 10 because sometime elements moves a little while clicking.
-                        //So that is click event.
-                        if (rawX < 10 && rawY < 10 && isViewCollapsed()) {
-                            //When user clicks on the image view of the collapsed layout,
-                            //visibility of the collapsed layout will be changed to "View.GONE"
-                            //and expanded view will become visible.
-                            collapsedView.setVisibility(View.GONE);
-                            expandedView.setVisibility(View.VISIBLE);
-                            //Toast.makeText(FloatingModMenuService.this, Html.fromHtml(Toast()), Toast.LENGTH_SHORT).show();
-                        }
+                        // Bar is drag-only - no toggle behavior on click
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         //Calculate the X and Y coordinates of the view.
@@ -473,37 +1176,24 @@ public class FloatingModMenuService extends Service {
         };
     }
 
-        private boolean hide = false;
-    private void initMenuButton(final View view2, final View view3) {
-        // ImGui-style toggle button click handler
+    private void initMenuButton() {
+        // ImGui-style toggle button click handler - only toggles content panel
         toggleBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    if (view3.getVisibility() == View.GONE) {
-                        // Currently collapsed, expand the menu
-                        view2.setVisibility(View.GONE);
-                        view3.setVisibility(View.VISIBLE);
+                    if (!isExpanded) {
+                        // Expand: Show content panel
+                        contentPanel.setVisibility(View.VISIBLE);
                         toggleBtn.setText("▼");
+                        isExpanded = true;
                     } else {
-                        // Currently expanded, collapse the menu
-                        view2.setVisibility(View.VISIBLE);
-                        view3.setVisibility(View.GONE);
-                        toggleBtn.setText("▶");
+                        // Collapse: Hide content panel
+                        contentPanel.setVisibility(View.GONE);
+                        toggleBtn.setText("‣");
+                        isExpanded = false;
                     }
                 }
             });
-                close.setOnClickListener(new View.OnClickListener() {
-                                public void onClick(View view) {
-                                        if (hide) {
-                                                view2.setVisibility(View.VISIBLE);
-                                                view2.setAlpha(0);
-                                                view3.setVisibility(View.GONE);
-                                        } else {
-                                                view2.setVisibility(View.VISIBLE);
-                                                view2.setAlpha(0.95f);
-                                                view3.setVisibility(View.GONE);
-                                        }
-                                }
-                        });
+        // Close button completely removed - only toggle button controls menu
     }
 
     private void createTabSystem() {
@@ -631,7 +1321,7 @@ public class FloatingModMenuService extends Service {
         
         for (int i = 0; i < listFT.length; i++) {
             final int feature = i;
-            String str = listFT[i];
+            final String str = listFT[i];
             
             // Skip category headers (CT_) as we organize by tabs now
             if (str.contains("CT_")) {
@@ -639,7 +1329,7 @@ public class FloatingModMenuService extends Service {
             }
             
             // Determine which tab this function belongs to
-            LinearLayout targetContainer = getTargetContainer(str);
+            final LinearLayout targetContainer = getTargetContainer(str);
             
             if (str.contains("Toggle55_")) {
                 addButtonToTab(targetContainer, str.replace("Toggle55_", ""), new InterfaceBtn() {
@@ -660,7 +1350,7 @@ public class FloatingModMenuService extends Service {
                     }
                 });
             } else if (str.contains("SB_")) {
-                String[] split = str.split("_");
+                final String[] split = str.split("_");
                 addSeekbarToTab(targetContainer, split[1], Integer.parseInt(split[2]), Integer.parseInt(split[3]), new InterfaceInt() {
                     public void OnWrite(int i) {
                         Changes(feature, i);
@@ -692,80 +1382,24 @@ public class FloatingModMenuService extends Service {
         return otherContent;
     }
     
-    private void addButtonToTab(LinearLayout container, String feature, final InterfaceBtn interfaceBtn) {
-        final Button button = new Button(this);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, dp(32));
-        layoutParams.setMargins(dp(4), dp(2), dp(4), dp(2));
-        button.setLayoutParams(layoutParams);
-        button.setPadding(dp(8), dp(4), dp(8), dp(4));
-        button.setTextSize(10.0f);
-        button.setTextColor(TEXT_COLOR);
-        button.setTypeface(Typeface.DEFAULT);
-        button.setGravity(Gravity.CENTER);
-        
-        // ImGui-style button setup
-        button.setText(feature + " OFF");
-        GradientDrawable buttonBg = new GradientDrawable();
-        buttonBg.setColor(BTN_COLOR);
-        buttonBg.setStroke(dp(1), IMGUI_BORDER);
-        buttonBg.setCornerRadius(dp(3));
-        button.setBackground(buttonBg);
-        
-        button.setOnClickListener(new View.OnClickListener() {
-            boolean isOn = false;
-            public void onClick(View view) {
-                isOn = !isOn;
-                if (isOn) {
-                    button.setText(feature + " ON");
-                    GradientDrawable activeBg = new GradientDrawable();
-                    activeBg.setColor(IMGUI_ACCENT);
-                    activeBg.setStroke(dp(1), IMGUI_BORDER);
-                    activeBg.setCornerRadius(dp(3));
-                    button.setBackground(activeBg);
-                } else {
-                    button.setText(feature + " OFF");
-                    GradientDrawable inactiveBg = new GradientDrawable();
-                    inactiveBg.setColor(BTN_COLOR);
-                    inactiveBg.setStroke(dp(1), IMGUI_BORDER);
-                    inactiveBg.setCornerRadius(dp(3));
-                    button.setBackground(inactiveBg);
-                }
-                interfaceBtn.OnWrite();
-            }
-        });
-        
-        container.addView(button);
+    private void addButtonToTab(LinearLayout container, final String feature, final InterfaceBtn interfaceBtn) {
+        // Use Premium Toggle Button from Component Factory
+        // This preserves the original callback system with feature index closure
+        Button premiumButton = componentFactory.createToggleButton(feature, interfaceBtn);
+        container.addView(premiumButton);
     }
     
-    private void addSeekbarToTab(LinearLayout container, String text, int min, int max, final InterfaceInt interfaceInt) {
-        LinearLayout seekLayout = new LinearLayout(this);
-        seekLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, dp(40)));
-        seekLayout.setOrientation(LinearLayout.VERTICAL);
-        seekLayout.setPadding(dp(8), dp(4), dp(8), dp(4));
-        
-        TextView label = new TextView(this);
-        label.setText(text + ": " + min);
-        label.setTextColor(TEXT_COLOR);
-        label.setTextSize(9f);
-        
-        SeekBar seekBar = new SeekBar(this);
-        seekBar.setMax(max - min);
-        seekBar.setProgress(0);
-        
-        // ImGui-style seekbar
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                int value = min + progress;
-                label.setText(text + ": " + value);
-                interfaceInt.OnWrite(value);
-            }
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-        
-        seekLayout.addView(label);
-        seekLayout.addView(seekBar);
-        container.addView(seekLayout);
+    // Alternative method for direct feature index control
+    private void addFeatureButtonToTab(LinearLayout container, final String featureName, final int featureIndex) {
+        // Use Direct Feature Toggle Button with explicit index
+        Button premiumButton = componentFactory.createFeatureToggleButton(featureName, featureIndex);
+        container.addView(premiumButton);
+    }
+    
+    private void addSeekbarToTab(LinearLayout container, final String text, final int min, final int max, final InterfaceInt interfaceInt) {
+        // Use Premium Slider Row from Component Factory  
+        LinearLayout premiumSlider = componentFactory.createSliderRow(text, min, max, interfaceInt);
+        container.addView(premiumSlider);
     }
 
     private TextView textView2;
@@ -830,32 +1464,28 @@ public class FloatingModMenuService extends Service {
                     public void onClick(View v) {
                         interfaceBtn.OnWrite();
                         if (isActive) {
-                            //button.setText(Html.fromHtml("" + feature2 + " ON" + "</font>"));
                             button.setText(Html.fromHtml("<font>" + feature2 + " <font color='WHITE'>" + "ON" + "</font>"));
-                            android.graphics.drawable.GradientDrawable ICECHHF = new android.graphics.drawable.GradientDrawable();
-                            ICECHHF.setColor(Color.argb(250, 10, 140, 180));
-                                                        ICECHHF.setColor(Color.parseColor("blue"));
-                                                        ICECHHF.setStroke(6, Color.parseColor("#FFF800"));
-                                                        button.setBackgroundColor(Color.TRANSPARENT);
-                            ICECHHF.setCornerRadius(10);
-                            android.graphics.drawable.RippleDrawable ICECHHF_RE = new android.graphics.drawable.RippleDrawable(new android.content.res.ColorStateList(new int[][]{new int[]{}}, new int[]{ Color.parseColor("black")}), ICECHHF, null);
-                            button.setBackground(ICECHHF_RE);
+                            // Use consistent ImGui styling
+                            GradientDrawable activeBg = new GradientDrawable();
+                            activeBg.setColor(IMGUI_ACCENT);
+                            activeBg.setStroke(dp(1), IMGUI_BORDER);
+                            activeBg.setCornerRadius(dp(3));
+                            button.setBackground(activeBg);
                             if(Build.VERSION.SDK_INT >= 21) {
-                                button.setElevation(5f); }
+                                button.setElevation(2f); }
                             isActive = false;
                             return;
                         }
                         //button.setText(Html.fromHtml("" + feature2 + " OFF" + "</font>"));
                         button.setText(Html.fromHtml("<font>" + feature2 + " <font color='WHITE'>" + "OFF" + "</font>"));
-                        button.setBackgroundColor(Color.TRANSPARENT);
-                        android.graphics.drawable.GradientDrawable GAFDJHE = new android.graphics.drawable.GradientDrawable();
-                        GAFDJHE.setColor(Color.parseColor("Black"));
-                                                GAFDJHE.setStroke(6, Color.parseColor("#FFF800"));
-                        GAFDJHE.setCornerRadius(10);
-                        android.graphics.drawable.RippleDrawable GAFDJHE_RE = new android.graphics.drawable.RippleDrawable(new android.content.res.ColorStateList(new int[][]{new int[]{}}, new int[]{ Color.parseColor("red")}), GAFDJHE, null);
-                        button.setBackground(GAFDJHE_RE);
+                        // Use consistent ImGui styling
+                        GradientDrawable inactiveBg = new GradientDrawable();
+                        inactiveBg.setColor(BTN_COLOR);
+                        inactiveBg.setStroke(dp(1), IMGUI_BORDER);
+                        inactiveBg.setCornerRadius(dp(3));
+                        button.setBackground(inactiveBg);
                         if(Build.VERSION.SDK_INT >= 21) {
-                            button.setElevation(5f); }
+                            button.setElevation(0f); }
                         isActive = true;
                     }
                 });

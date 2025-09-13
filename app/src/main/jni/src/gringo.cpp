@@ -37,7 +37,7 @@ return true;
 
 JNIEXPORT jstring JNICALL
 Java_uk_lgl_modmenu_FloatingModMenuService_ForegroundGravity(JNIEnv *env,jobject activityObject) {
-jstring str = env->NewStringUTF((OBFUSCATE("DEXX-TER")));
+jstring str = env->NewStringUTF((OBFUSCATE("DEXX-TER V1.0")));
 return str;
 }
 
@@ -330,7 +330,7 @@ Vector3 CameraMain(void* player) {
 
 static void spofNick(void *players) {
 void (*_spof_nick)(void *player, monoString *nick) = (void (*)(void *, monoString *))getRealOffset(address.FakeName);
-_spof_nick(players, CreateString((OBFUSCATE("[FF0000]YOUTUBE : [00FF00]GOD X MODS TEAM"))));
+_spof_nick(players, CreateString((OBFUSCATE("[FF0000]YOUTUBE : [00FF00]@Gohan52"))));
 }
 
 void *GetVehicle(void * Match) {
@@ -1139,10 +1139,12 @@ if(crosshair) {
 esp.DrawCrosshair( Color(EspColor), Vector3(screenWidth / 2, screenHeight/2), 80);
 }
 
-esp.DrawCustomColor(Color::Red(),
-Vector2(screenWidth / 2 - screenHeight / 6, screenHeight / 16),
-Vector2(screenWidth / 2 + screenHeight / 6, screenHeight / 10.1));
-esp.DrawCustomText(Color::Black(), 0.6f, ("DEXX-TER"),
+// Golden text with shining effect (no box)
+// Draw shadow/glow effect for shine
+esp.DrawCustomText(Color(80, 50, 25, 0), 0.8f, ("DEXX-TER V1.0"),
+Vector3(screenWidth / 2 + 2, screenHeight / 11 + 2), 30);
+// Draw main golden text
+esp.DrawCustomText(Color(255, 215, 0), 0.9f, ("DEXX-TER V1.0"),
 Vector3(screenWidth / 2, screenHeight / 11), 30);
  
 //if(ActivateAimbot) {

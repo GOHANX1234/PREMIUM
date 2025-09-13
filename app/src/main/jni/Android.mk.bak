@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 MAIN_LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE  := h4xhackff
+LOCAL_MODULE  := MRKILLER2.5
 
 
 LOCAL_ARM_MODE := arm

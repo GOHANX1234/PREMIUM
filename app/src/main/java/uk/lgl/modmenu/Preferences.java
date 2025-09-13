@@ -23,10 +23,10 @@ public class Preferences {
     public static GradientDrawable bbbbb_aaaaaaaa(Context context) {
         GradientDrawable gradientDrawable = new GradientDrawable();
         gradientDrawable.setShape(0);
-        gradientDrawable.setStroke(3, Color.BLACK);
-        gradientDrawable.setColor(Color.parseColor("#FF0000"));
+        gradientDrawable.setStroke(3, Color.parseColor("#00FF00")); // Green border
+        gradientDrawable.setColor(Color.TRANSPARENT); // Transparent background instead of red
         gradientDrawable.setCornerRadii(new float[] { 20, 20, 10, 10, 20, 20, 10, 10 });
-		gradientDrawable.setCornerRadius(TypedValue.applyDimension((int)1, (float)5.0f, (DisplayMetrics)context.getResources().getDisplayMetrics()));
+                gradientDrawable.setCornerRadius(TypedValue.applyDimension((int)1, (float)5.0f, (DisplayMetrics)context.getResources().getDisplayMetrics()));
         return gradientDrawable;
     }
 

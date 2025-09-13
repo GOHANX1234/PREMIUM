@@ -75,10 +75,10 @@ public class ESPView extends View implements Runnable {
         this.mTextPaint.setTextAlign(Paint.Align.CENTER);
     }
 
-	
-	
-	public void DrawCustomColor(Canvas cvs, int a, int r, int g, int b, int x, int y, int width, int height) {
-        int colors[] = {Color.TRANSPARENT, Color.RED, Color.TRANSPARENT};
+        
+        
+        public void DrawCustomColor(Canvas cvs, int a, int r, int g, int b, int x, int y, int width, int height) {
+        int colors[] = {Color.TRANSPARENT, Color.GREEN, Color.TRANSPARENT};
         GradientDrawable mDrawable = new GradientDrawable(GradientDrawable.Orientation.RIGHT_LEFT, colors);
         mDrawable.setShape(GradientDrawable.RECTANGLE);
         mDrawable.setGradientRadius(2.0f * 60);
@@ -90,10 +90,10 @@ public class ESPView extends View implements Runnable {
         cvs.restore();
     }
 
-	public void DrawCustomText(Canvas cvs, int a, int r, int g, int b, float stroke, String txt, float posX, float posY, float size) {
+        public void DrawCustomText(Canvas cvs, int a, int r, int g, int b, float stroke, String txt, float posX, float posY, float size) {
         mTextPaint.setColor(Color.rgb(r, g, b));
         mTextPaint.setAlpha(a);
-		mTextPaint.setTypeface(Typeface.MONOSPACE);      
+                mTextPaint.setTypeface(Typeface.MONOSPACE);      
 
         if (getRight() > 1920 || getBottom() > 1920)
             mTextPaint.setTextSize(4.0f + size);
@@ -118,8 +118,8 @@ public class ESPView extends View implements Runnable {
     public void DrawText(Canvas cvs, int a, int r, int g, int b, float stroke, String txt, float posX, float posY, float size) {
         mTextPaint.setColor(Color.rgb(r, g, b));
         mTextPaint.setAlpha(a);
-		mTextPaint.setTypeface(Typeface.MONOSPACE);      
-		
+                mTextPaint.setTypeface(Typeface.MONOSPACE);      
+                
         if (getRight() > 1920 || getBottom() > 1920)
             mTextPaint.setTextSize(4.0f + size);
         else if (getRight() == 1920 || getBottom() == 1920)
